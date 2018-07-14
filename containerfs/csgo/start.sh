@@ -18,7 +18,6 @@ then
     }
 
     export SERVER_HOSTNAME="${SERVER_HOSTNAME:-$(get_metadata SERVER_HOSTNAME)}"
-    export SERVER_PASSWORD="${SERVER_PASSWORD:-$(get_metadata SERVER_PASSWORD)}"
     export RCON_PASSWORD="${RCON_PASSWORD:-$(get_metadata RCON_PASSWORD)}"
     export STEAM_ACCOUNT="${STEAM_ACCOUNT:-$(get_metadata STEAM_ACCOUNT)}"
     export CSGO_DIR="${CSGO_DIR:-$(get_metadata CSGO_DIR)}"
@@ -32,7 +31,6 @@ then
     export MAXPLAYERS="${MAXPLAYERS:-$(get_metadata MAXPLAYERS)}"
 else
     export SERVER_HOSTNAME="${SERVER_HOSTNAME:-An Amazing CSGO Server}"
-    export SERVER_PASSWORD="${SERVER_PASSWORD:-changeme}"
     export RCON_PASSWORD="${RCON_PASSWORD:-changeme}"
     export STEAM_ACCOUNT="${STEAM_ACCOUNT:-changeme}"
     export CSGO_DIR="${CSGO_DIR:-/csgo}"
@@ -54,7 +52,6 @@ cd $CSGO_DIR
 cat << SERVERCFG > $CSGO_DIR/csgo/cfg/server.cfg
 hostname "$SERVER_HOSTNAME"
 rcon_password "$RCON_PASSWORD"
-sv_password "$SERVER_PASSWORD"
 sv_lan 0
 sv_cheats 0
 SERVERCFG
