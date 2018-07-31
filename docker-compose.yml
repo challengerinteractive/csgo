@@ -1,0 +1,28 @@
+version: '3'
+services:
+  csgo-server:
+    build: ./gameserver
+    image: 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: always
+    env_file: docker-compose.env
+    ports:
+      - "0.0.0.0:27015:27015"
+      - "0.0.0.0:27015:27015/udp"
+    volumes:
+      - /var/log/csgo:/csgo/csgo/logs
+    networks:
+      - local
+  event_forwarder:
+    build: ./event_forwarder
+    env_file: docker-compose.env
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: always
+    networks:
+      - local
+networks:
+  - local
