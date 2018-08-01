@@ -18,7 +18,7 @@ public Plugin myinfo =
     name = "Challenger Telemetry Plugin",
     author = "Patrick McClory <pmdev@introspectdat.com>",
     description = "Event-based telemetry forwarder for ChallengerVault application",
-    version = "0.1.0",
+    version = "0.1.1",
     url = "https://github.com/challengerinteractive/csgo"
 };
 
@@ -42,7 +42,86 @@ public void OnPluginStart()
    PostUrl = CreateConVar("challenger_PostUrl", "http://logging_server:5000", "The Url the events will be posted to.");
    AutoExecConfig(true, "challenger");
    HookEvent("player_death", Event_PlayerDeath);
+   HookEvent("player_connect", Event_PlayerConnect);
+   HookEvent("player_info", Event_PlayerInfo);
+   HookEvent("player_disconnect", Event_PlayerDisconnect);
    //HookEvent("other_death", Event_OtherDeath);
+}
+
+public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadcast)
+{
+  Handle json = json_object();
+  set_json_string(json, "event_type", "player_connect");
+  json_object_set_new(json, "timestamp", json_integer(GetTime()));
+  char connect_name[64];
+  event.GetString("name", connect_name, sizeof(connect_name));
+  set_json_string(json, "name", connect_name);
+
+  set_json_int(json, "user_id", event.GetInt("userid"));
+
+  char networkid[64];
+  event.GetString("networkid", networkid, sizeof(networkid));
+  set_json_string(json, "network_id", networkid);
+
+  char address[32];
+  event.GetString("address", address, sizeof(address));
+  set_json_string(json, "address", address);
+  set_json_int(json, "bot", event.GetInt("bot"));
+  char current_map[32];
+  GetCurrentMap(current_map, sizeof(current_map));
+  set_json_string(json, "map", current_map);
+
+  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
+  char buffer[8192];
+  json_dump(json, buffer, sizeof(buffer));
+  LogChallengerAction("player_connect", buffer);
+}
+
+public void Event_PlayerInfo(Event event, const char[] name, bool dontBroadcast)
+{
+  Handle json = json_object();
+  set_json_string(json, "event_type", "player_info");
+  json_object_set_new(json, "timestamp", json_integer(GetTime()));
+  char disconnect_name[64];
+  event.GetString("name", disconnect_name, sizeof(disconnect_name));
+  set_json_string(json, "name", disconnect_name);
+  set_json_int(json, "user_id", event.GetInt("userid"));
+  char networkid[64];
+  event.GetString("networkid", networkid, sizeof(networkid));
+  set_json_string(json, "network_id", networkid);
+  set_json_int(json, "bot", event.GetInt("bot"));
+  char current_map[32];
+  GetCurrentMap(current_map, sizeof(current_map));
+  set_json_string(json, "map", current_map);
+
+  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
+
+  char buffer[8192];
+  json_dump(json, buffer, sizeof(buffer));
+  LogChallengerAction("player_info", buffer);
+}
+
+public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
+{
+  Handle json = json_object();
+  set_json_string(json, "event_type", "player_disconnect");
+  json_object_set_new(json, "timestamp", json_integer(GetTime()));
+  set_json_int(json, "user_id", event.GetInt("userid"));
+  char reason[32];
+  event.GetString("reason", reason, sizeof(reason));
+  set_json_string(json, "reason", reason);
+  char networkid[64];
+  event.GetString("networkid", networkid, sizeof(networkid));
+  set_json_string(json, "network_id", networkid);
+  set_json_int(json, "bot", event.GetInt("bot"));
+  char current_map[32];
+  GetCurrentMap(current_map, sizeof(current_map));
+  set_json_string(json, "map", current_map);
+
+  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
+  char buffer[8192];
+  json_dump(json, buffer, sizeof(buffer));
+  LogChallengerAction("player_disconnect", buffer);
 }
 
 //https://wiki.alliedmods.net/Counter-Strike:_Global_Offensive_Events#player_death
@@ -136,7 +215,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
        set_json_string(json, "attacker_ip", attacker_ip);
      }
    }
-   
+
    set_json_string(json, "weapon", weapon);
    set_json_bool(json, "headshot", event.GetBool("headshot", false));
    set_json_int(json, "dominated", event.GetInt("dominated", 0));
@@ -150,12 +229,13 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
    set_json_int(json, "steam_server_id", GetServerSteamAccountId());
    char buffer[8192];
    json_dump(json, buffer, sizeof(buffer));
-   LogActionToFile("player_death", buffer);
+   LogChallengerAction("player_death", buffer);
 }
 
 
-public void LogActionToFile(char[] name, char[] message) {
-  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), name, "v0.1.0", message);
+public void LogChallengerAction(char[] name, char[] message) {
+  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), name, "v0.1.1", message);
+  LogActionToHttp(name, message);
 }
 
 public void LogActionToHttp(char[] name, char[] message){

@@ -17,12 +17,16 @@ services:
       - local
   event_forwarder:
     build: ./event_forwarder
+    image: 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
     env_file: docker-compose.env
     deploy:
       replicas: 1
       restart_policy:
         condition: always
     networks:
-      - local
+      local:
+        aliases:
+          - logging_server
+          - event_forwarder
 networks:
   - local
