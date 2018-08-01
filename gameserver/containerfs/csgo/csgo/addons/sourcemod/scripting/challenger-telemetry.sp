@@ -45,7 +45,27 @@ public void OnPluginStart()
    HookEvent("player_connect", Event_PlayerConnect);
    HookEvent("player_info", Event_PlayerInfo);
    HookEvent("player_disconnect", Event_PlayerDisconnect);
+   HookEvent("player_activate", Event_PlayerActivate);
    //HookEvent("other_death", Event_OtherDeath);
+}
+
+public void Event_PlayerActivate(Event event, const char[] name, bool dontBroadcast){
+  int user_id = event.GetInt("userid");
+  int user_client = GetClientOfUserId(user_id);
+  if (!IsFakeClient(user_client)){
+    //if not a bot, go grab more data...
+    char user_steam_id[64]
+    if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
+      Handle json = json_object();
+      set_json_string(json, "event_type", "player_activate");
+      set_json_int(json, "user_id", user_id);
+      set_json_string(json, "user_steam_id", user_steam_id);
+      set_json_int(json, "steam_server_id", GetServerSteamAccountId());
+      char buffer[4096];
+      json_dump(json, buffer, sizeof(buffer));
+      LogChallengerAction("player_activate", buffer);
+    }
+  }
 }
 
 public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadcast)

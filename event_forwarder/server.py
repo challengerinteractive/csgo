@@ -18,36 +18,18 @@ partition_key = None
 def csgo():
     data = request.data.decode('UTF-8')
     json_data = json.loads(data) # parse JSON
-
-    kinesis_payload = {}
-    if json_data.get('event_type') == 'player_death':
-        kinesis_payload = {'game':{'id':'1',
-                                   'name': 'counterstrike',
-                                   'type': 'FPS',
-                                   'match': {'id':'',
-                                             'map': json_data.get('map'),
-                                             'type': str(os.getenv('GAME_TYPE'))}},
-                           'type': 'action',
-                           'name': 'kill',
-                           'event_type': json_data.get('event_type'),
-                           'time': json_data.get('timestamp', str(time.time())),
-                           'winner': {'steam_id': json_data.get('attacker_steam_id', 'BOT'),
-                                      'headshot': str(json_data.get('headshot', False))},
-                           'loser': {'steam_id': json_data.get('victim_steam_id', 'BOT')},
-                           'assister': {'steam_id': json_data.get('assister_steam_id', 'BOT')},
-                           'platform': {'id': '1', 'name': 'PC'},
-                           'system': {'name': 'Steam'},
-                           'server': {'ip': public_ip,
-                                      'system_id': json_data.get('steam_server_id'),
-                                      'name': os.getenv('SERVER_HOSTNAME')}}
-
-    for direction in ['up', 'down']:
-        for key in ['victim_latency', 'victim_avg_loss', 'victim_avg_choke']:
-            idx = "%s_%s" % (key, direction)
-            if json_data.get(idx):
-                if not kinesis_payload.get('debug'):
-                    kinesis_payload['debug'] = {}
-                kinesis_payload['debug'][idx] = json_data.get(idx)
+    event_type = json_data.pop('event_type')
+    kinesis_payload = {'event_type': event_type,
+                       'game': {'id': '730',
+                                'name': 'cs:go',
+                                'type': 'fps',
+                                'platform': 'steam'},
+                       'server': {'ip': public_ip,
+                                  'mode': os.getenv('GAME_MODE'),
+                                  'type': os.getenv('GAME_TYPE'),
+                                  'timestamp': str(time.time()),
+                                  'name': os.getenv('SERVER_HOSTNAME', 'CS:GO Server'},
+                       'payload': json_data}
 
     if os.getenv('DRY_RUN', False):
         logging.info('DryRun - Payload: ' + json.dumps(kinesis_payload))
