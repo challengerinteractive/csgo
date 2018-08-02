@@ -22,6 +22,21 @@ public Plugin myinfo =
     url = "https://github.com/challengerinteractive/csgo"
 };
 
+public Handle getBaseResponse(const char[] name){
+  Handle json = json_object();
+  set_json_string(json, "event_type", name);
+  char server_auth_id[64];
+  GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
+  set_json_string(json, "server_auth_id", server_auth_id);
+  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
+  json_object_set_new(json, "timestamp", json_integer(GetTime()));
+
+  char current_map[32];
+  GetCurrentMap(current_map, sizeof(current_map));
+  set_json_string(json, "map", current_map);
+
+  return json;
+}
 
 /**
  * Called when the plugin is fully initialized and all known external references
@@ -56,92 +71,85 @@ public void Event_PlayerActivate(Event event, const char[] name, bool dontBroadc
     //if not a bot, go grab more data...
     char user_steam_id[64]
     if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
-      Handle json = json_object();
-      set_json_string(json, "event_type", "player_activate");
+      Handle json = getBaseResponse("server_player_activate");
       set_json_int(json, "user_id", user_id);
       set_json_string(json, "user_steam_id", user_steam_id);
-      set_json_int(json, "steam_server_id", GetServerSteamAccountId());
       char buffer[4096];
       json_dump(json, buffer, sizeof(buffer));
-      LogChallengerAction("player_activate", buffer);
+      LogChallengerAction("server_player_activate", buffer);
     }
   }
 }
 
 public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadcast)
 {
-  Handle json = json_object();
-  set_json_string(json, "event_type", "player_connect");
-  json_object_set_new(json, "timestamp", json_integer(GetTime()));
-  char connect_name[64];
-  event.GetString("name", connect_name, sizeof(connect_name));
-  set_json_string(json, "name", connect_name);
+  int user_id = event.GetInt("userid");
+  int user_client = GetClientOfUserId(user_id);
+  if (!IsFakeClient(user_client)){
+    Handle json = getBaseResponse("server_player_connect");
 
-  set_json_int(json, "user_id", event.GetInt("userid"));
+    char connect_name[64];
+    event.GetString("name", connect_name, sizeof(connect_name));
+    set_json_string(json, "name", connect_name);
 
-  char networkid[64];
-  event.GetString("networkid", networkid, sizeof(networkid));
-  set_json_string(json, "network_id", networkid);
+    set_json_int(json, "user_id", event.GetInt("userid"));
 
-  char address[32];
-  event.GetString("address", address, sizeof(address));
-  set_json_string(json, "address", address);
-  set_json_int(json, "bot", event.GetInt("bot"));
-  char current_map[32];
-  GetCurrentMap(current_map, sizeof(current_map));
-  set_json_string(json, "map", current_map);
+    char networkid[64];
+    event.GetString("networkid", networkid, sizeof(networkid));
+    set_json_string(json, "network_id", networkid);
 
-  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
-  char buffer[8192];
-  json_dump(json, buffer, sizeof(buffer));
-  LogChallengerAction("player_connect", buffer);
+    char address[32];
+    event.GetString("address", address, sizeof(address));
+    set_json_string(json, "address", address);
+    set_json_int(json, "bot", event.GetInt("bot"));
+
+    char buffer[8192];
+    json_dump(json, buffer, sizeof(buffer));
+    LogChallengerAction("server_player_connect", buffer);
+  }
 }
 
 public void Event_PlayerInfo(Event event, const char[] name, bool dontBroadcast)
 {
-  Handle json = json_object();
-  set_json_string(json, "event_type", "player_info");
-  json_object_set_new(json, "timestamp", json_integer(GetTime()));
-  char disconnect_name[64];
-  event.GetString("name", disconnect_name, sizeof(disconnect_name));
-  set_json_string(json, "name", disconnect_name);
-  set_json_int(json, "user_id", event.GetInt("userid"));
-  char networkid[64];
-  event.GetString("networkid", networkid, sizeof(networkid));
-  set_json_string(json, "network_id", networkid);
-  set_json_int(json, "bot", event.GetInt("bot"));
-  char current_map[32];
-  GetCurrentMap(current_map, sizeof(current_map));
-  set_json_string(json, "map", current_map);
+  int user_id = event.GetInt("userid");
+  int user_client = GetClientOfUserId(user_id);
+  if (!IsFakeClient(user_client)){
+    Handle json = getBaseResponse("server_player_info");
 
-  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
+    char disconnect_name[64];
+    event.GetString("name", disconnect_name, sizeof(disconnect_name));
+    set_json_string(json, "name", disconnect_name);
+    set_json_int(json, "user_id", event.GetInt("userid"));
+    char networkid[64];
+    event.GetString("networkid", networkid, sizeof(networkid));
+    set_json_string(json, "network_id", networkid);
+    set_json_int(json, "bot", event.GetInt("bot"));
 
-  char buffer[8192];
-  json_dump(json, buffer, sizeof(buffer));
-  LogChallengerAction("player_info", buffer);
+    char buffer[8192];
+    json_dump(json, buffer, sizeof(buffer));
+    LogChallengerAction("server_player_info", buffer);
+  }
 }
 
 public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
 {
-  Handle json = json_object();
-  set_json_string(json, "event_type", "player_disconnect");
-  json_object_set_new(json, "timestamp", json_integer(GetTime()));
-  set_json_int(json, "user_id", event.GetInt("userid"));
-  char reason[32];
-  event.GetString("reason", reason, sizeof(reason));
-  set_json_string(json, "reason", reason);
-  char networkid[64];
-  event.GetString("networkid", networkid, sizeof(networkid));
-  set_json_string(json, "network_id", networkid);
-  set_json_int(json, "bot", event.GetInt("bot"));
-  char current_map[32];
-  GetCurrentMap(current_map, sizeof(current_map));
-  set_json_string(json, "map", current_map);
+  int user_id = event.GetInt("userid");
+  int user_client = GetClientOfUserId(user_id);
+  if (!IsFakeClient(user_client)){
+    Handle json = getBaseResponse("server_player_disconnect");
+    set_json_int(json, "user_id", event.GetInt("userid"));
+    char reason[32];
+    event.GetString("reason", reason, sizeof(reason));
+    set_json_string(json, "reason", reason);
+    char networkid[64];
+    event.GetString("networkid", networkid, sizeof(networkid));
+    set_json_string(json, "network_id", networkid);
+    set_json_int(json, "bot", event.GetInt("bot"));
 
-  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
-  char buffer[8192];
-  json_dump(json, buffer, sizeof(buffer));
-  LogChallengerAction("player_disconnect", buffer);
+    char buffer[8192];
+    json_dump(json, buffer, sizeof(buffer));
+    LogChallengerAction("server_player_disconnect", buffer);
+  }
 }
 
 //https://wiki.alliedmods.net/Counter-Strike:_Global_Offensive_Events#player_death
@@ -152,12 +160,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
    int victim_client = GetClientOfUserId(victim_id);
    int attacker_client = GetClientOfUserId(attacker_id);
    int assister_id = event.GetInt("assister");
-   char weapon[64];
-   event.GetString("weapon", weapon, sizeof(weapon));
-   Handle json = json_object();
-
-   json_object_set_new(json, "timestamp", json_integer(GetTime()));
-   set_json_string(json, "event_type", "player_death");
+   Handle json = getBaseResponse("server_player_death");
 
    if(assister_id != 0){
      int assister_client = GetClientOfUserId(assister_id);
@@ -236,20 +239,17 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
      }
    }
 
+   char weapon[64];
+   event.GetString("weapon", weapon, sizeof(weapon));
    set_json_string(json, "weapon", weapon);
    set_json_bool(json, "headshot", event.GetBool("headshot", false));
    set_json_int(json, "dominated", event.GetInt("dominated", 0));
    set_json_int(json, "revenge", event.GetInt("revenge", 0));
    set_json_int(json, "penetrated", event.GetInt("penetrated", 0));
 
-   char current_map[32];
-   GetCurrentMap(current_map, sizeof(current_map));
-   set_json_string(json, "map", current_map);
-
-   set_json_int(json, "steam_server_id", GetServerSteamAccountId());
    char buffer[8192];
    json_dump(json, buffer, sizeof(buffer));
-   LogChallengerAction("player_death", buffer);
+   LogChallengerAction("server_player_death", buffer);
 }
 
 

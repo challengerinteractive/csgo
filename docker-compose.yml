@@ -15,7 +15,7 @@ services:
       - /var/log/csgo:/csgo/csgo/logs
     networks:
       - local
-  event_forwarder:
+  event-forwarder:
     build: ./event_forwarder
     image: 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
     env_file: docker-compose.env
