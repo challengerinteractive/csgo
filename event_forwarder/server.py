@@ -28,7 +28,7 @@ def csgo():
                                   'mode': os.getenv('GAME_MODE'),
                                   'type': os.getenv('GAME_TYPE'),
                                   'timestamp': str(time.time()),
-                                  'name': os.getenv('SERVER_HOSTNAME', 'CS:GO Server'},
+                                  'name': os.getenv('SERVER_HOSTNAME', 'CS:GO Server')},
                        'payload': json_data}
 
     if os.getenv('DRY_RUN', False):

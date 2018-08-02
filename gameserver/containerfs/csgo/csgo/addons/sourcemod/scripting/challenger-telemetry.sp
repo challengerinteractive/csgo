@@ -98,6 +98,10 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
 
+    char steam_id[64];
+    GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
+    set_json_string(json, "steam_id", steam_id);
+
     char address[32];
     event.GetString("address", address, sizeof(address));
     set_json_string(json, "address", address);
@@ -123,6 +127,10 @@ public void Event_PlayerInfo(Event event, const char[] name, bool dontBroadcast)
     char networkid[64];
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
+
+    char steam_id[64];
+    GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
+    set_json_string(json, "steam_id", steam_id);
     set_json_int(json, "bot", event.GetInt("bot"));
 
     char buffer[8192];
@@ -144,6 +152,10 @@ public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroa
     char networkid[64];
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
+
+    char steam_id[64];
+    GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
+    set_json_string(json, "steam_id", steam_id);
     set_json_int(json, "bot", event.GetInt("bot"));
 
     char buffer[8192];
