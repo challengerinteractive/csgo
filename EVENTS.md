@@ -64,6 +64,7 @@ The `player_death` event fires whenever there's a death in the game, regardless 
 
 For each of these 'roles' in a player death event, if the user is not a bot user, we append additional information for the user such as their Steam ID, and IP and client time. Additionally, for the victim, if they aren't a bot, we also pull data on their network latency. On top of this, note that sometimes there's an assister, sometimes there's not. The payload fields are pretty much sourced directly from the [event data](https://wiki.alliedmods.net/Counter-Strike:_Global_Offensive_Events#player_death) and the following functions:
 
+* Bot detection - [IsFakeClient](https://sm.alliedmods.net/new-api/clients/IsFakeClient)
 * `victim_avg_loss_(up|down)` - [GetClientAvgLoss](https://sm.alliedmods.net/new-api/clients/GetClientAvgLoss)
 * `victim_latency_(up|down)` - [GetclientLatency](https://sm.alliedmods.net/new-api/clients/GetClientLatency)
 * `victim_avg_choke_(up|down)` - [GetClientAvgChoke](https://sm.alliedmods.net/new-api/clients/GetClientAvgChoke)
@@ -72,7 +73,6 @@ For each of these 'roles' in a player death event, if the user is not a bot user
 * `name_deaths` - [GetClientDeaths](https://sm.alliedmods.net/new-api/clients/GetClientDeaths)
 * `name_time` - 	[GetClientTime](https://sm.alliedmods.net/new-api/clients/GetClientTime)
 * `name_ip` - [GetClientIP](https://sm.alliedmods.net/new-api/clients/GetClientIP)
-* Bot detection - [IsFakeClient](https://sm.alliedmods.net/new-api/clients/IsFakeClient)
 * `name_name` - [GetClientName](https://sm.alliedmods.net/new-api/clients/GetClientName)
 * `name_steam_id` - [GetClientAuthId](https://sm.alliedmods.net/new-api/clients/GetClientAuthId)
 * `name_weapon` - [GetClientWeapon](https://sm.alliedmods.net/new-api/clients/GetClientWeapon)
