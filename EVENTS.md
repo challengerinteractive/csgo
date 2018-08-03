@@ -83,7 +83,7 @@ Where `name` is one of ['victim', 'attacker', 'assister']
 
 ```json
 {
-	"event_type": "player_death",
+	"event_type": "server_player_death",
 	"game": {
 		"id": "730",
 		"name": "cs:go",
@@ -105,6 +105,8 @@ Where `name` is one of ['victim', 'attacker', 'assister']
 		"victim_weapon": "",
 		"attacker_health": 61,
 		"assister_weapon": "",
+		"assister_team_name":"",
+		"attacker_team_name": "TERRORIST",
 		"victim_serial": 4359,
 		"assister_armor": 0,
 		"assister_deaths": 2,
@@ -112,6 +114,7 @@ Where `name` is one of ['victim', 'attacker', 'assister']
 		"assister_health": 0,
 		"attacker_deaths": 0,
 		"assister_serial": 3845,
+		"victim_team_name": "CT",
 		"victim_deaths": 2,
 		"dominated": 0,
 		"assiter_name": "Cory",
@@ -132,7 +135,7 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 
 ```json
 {
-	"event_type": "player_death",
+	"event_type": "server_player_death",
 	"game": {
 		"id": "730",
 		"name": "cs:go",
@@ -161,6 +164,7 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 		"victim_armor": 0,
 		"victim_avg_loss_up": 0.0,
 		"victim_latency_down": 0.051481619477272034,
+		"victim_team_name": "CT",
 		"attacker_serial": 1542,
 		"victim_ip": "172.14.55.13",
 		"penetrated": 0,
@@ -168,6 +172,7 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 		"victim_avg_loss_down": 0.0,
 		"victim_avg_choke_up": 0.6013933420181274,
 		"attacker_health": 84,
+		"attacker_team_name": "TERROIST",
 		"victim_avg_choke_down": 0.0,
 		"attacker_name": "Finn",
 		"attacker_armor": 0,
@@ -182,7 +187,7 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 
 ```json
 {
-	"event_type": "player_death",
+	"event_type": "server_player_death",
 	"game": {
 		"id": "730",
 		"name": "cs:go",
@@ -205,6 +210,7 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 		"victim_client_time": 343.5828857421875,
 		"victim_steam_id": "76561198826380494",
 		"victim_name": "patrick",
+		"victim_team_name": "CT",
 		"victim_serial": 257,
 		"attacker_deaths": 0,
 		"victim_deaths": 1,
@@ -218,6 +224,7 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 		"victim_avg_loss_down": 0.0,
 		"victim_avg_choke_up": 0.6013933420181274,
 		"attacker_health": 84,
+		"attacker_team_name": "TERROIST",
 		"victim_avg_choke_down": 0.0,
 		"attacker_name": "caerus",
     "attacker_steam_id": "12345678909876543",
@@ -237,7 +244,7 @@ This event derives its data from the [`player_connect`](https://wiki.alliedmods.
 
 ```json
 {
-	"event_type": "player_connect",
+	"event_type": "server_player_connect",
 	"game": {
 		"id": "730",
 		"name": "cs:go",
@@ -258,6 +265,7 @@ This event derives its data from the [`player_connect`](https://wiki.alliedmods.
 		"address": "",
 		"user_id": 12,
 		"network_id": "STEAM_1:0:433057383",
+		"steam_id": "123309842141298321",
 		"map": "de_dust2",
 		"steam_server_id": 2409689
 	}
@@ -277,7 +285,7 @@ This event derives its data from the [`player_disconnect`](https://wiki.alliedmo
 
 ```json
 {
-	"event_type": "player_disconnect",
+	"event_type": "server_player_disconnect",
 	"game": {
 		"id": "730",
 		"name": "cs:go",
@@ -297,6 +305,7 @@ This event derives its data from the [`player_disconnect`](https://wiki.alliedmo
     "timestamp": 1533169199,
 		"bot": 0,
 		"network_id": "STEAM_1:0:433057383",
+		"steam_id": "123309842141298321",
 		"user_id": 2,
 		"reason": "Disconnect"
 	}
@@ -310,7 +319,7 @@ This event derives its data from the [`player_activate`](https://wiki.alliedmods
 
 ```json
 {
-	"event_type": "player_activate",
+	"event_type": "server_player_activate",
 	"game": {
 		"id": "730",
 		"name": "cs:go",
@@ -331,3 +340,130 @@ This event derives its data from the [`player_activate`](https://wiki.alliedmods
 	}
 }
 ```
+
+## `game_start`
+
+* https://wiki.alliedmods.net/Generic_Source_Events#game_start
+
+## `game_end`
+
+* https://wiki.alliedmods.net/Generic_Source_Events#game_end
+
+## `player_team`
+
+* https://wiki.alliedmods.net/Generic_Source_Events#player_team
+
+This event fires when a user changes teams.
+
+```json
+{
+	"event_type": "server_player_team",
+	"game": {
+		"id": "730",
+		"name": "cs:go",
+		"type": "fps",
+		"platform": "steam"
+	},
+	"server": {
+		"ip": "34.218.255.44",
+		"mode": "1",
+		"type": "0",
+		"timestamp": "1533266553.6903992",
+		"name": "ChallengerVault.com Telemetry Test"
+	},
+	"payload": {
+		"map": "de_dust2",
+		"server_auth_id": "85568392922449113",
+		"steam_server_id": 2409689,
+		"timestamp": 1533266553,
+		"user_steam_id": "76561197978981763",
+		"disconnect": false,
+		"old_team_name": "CT",
+		"new_team_name": "Unassigned"
+	}
+}
+```
+
+## `round_start`
+
+* https://wiki.alliedmods.net/Generic_Source_Events#round_start
+
+```json
+{
+	"event_type": "server_round_start",
+	"game": {
+		"id": "730",
+		"name": "cs:go",
+		"type": "fps",
+		"platform": "steam"
+	},
+	"server": {
+		"ip": "34.218.255.44",
+		"mode": "1",
+		"type": "0",
+		"timestamp": "1533266134.148136",
+		"name": "ChallengerVault.com Telemetry Test"
+	},
+	"payload": {
+		"objective": "BOMB TARGET",
+		"map": "de_dust2",
+		"server_auth_id": "85568392922449113",
+		"frag_limit": 0,
+		"steam_server_id": 2409689,
+		"timestamp": 1533266134,
+		"time_limit": 115
+	}
+}
+```
+
+## `round_end`
+
+* https://wiki.alliedmods.net/Generic_Source_Events#round_end
+
+```json
+{
+	"event_type": "server_round_end",
+	"game": {
+		"id": "730",
+		"name": "cs:go",
+		"type": "fps",
+		"platform": "steam"
+	},
+	"server": {
+		"ip": "34.218.255.44",
+		"mode": "1",
+		"type": "0",
+		"timestamp": "1533169199.4689293",
+		"name": "ChallengerVault.com Telemetry Test"
+	},
+	"payload": {
+		"map": "de_dust2",
+    "winner_id": 2,
+    "server_auth_id": "85568392922449113",
+    "steam_server_id": 2409689,
+    "timestamp": 1533266044,
+    "message": "#SFUI_Notice_Terrorists_Win",
+    "winning_team_name": "TERRORIST",
+    "reason": 9
+	}
+}
+```
+
+# Event-only Triggers
+
+The following events carry only the default data associated with event data in our system and don't convey any data on their own. they are meant to act as state identifiers within the game.
+
+* `begin_new_match`
+* `cs_intermission`
+* `round_poststart`
+* `round_officially_ended`
+* `round_freeze_end`
+* `cs_game_disconnected`
+* `round_announce_match_start`
+* `round_announce_last_round_half`
+* `round_announce_match_point`
+* `round_announce_match_start`
+* `round_time_warning`
+* `cs_match_end_restart`
+* `cs_pre_restart`
+* `client_disconnect`

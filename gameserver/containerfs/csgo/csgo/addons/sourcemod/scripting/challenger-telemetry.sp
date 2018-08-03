@@ -23,20 +23,23 @@ public Plugin myinfo =
 };
 
 public Handle getBaseResponse(const char[] name){
-  Handle json = json_object();
-  set_json_string(json, "event_type", name);
+  Handle baseJson = json_object();
+  char buffer[48];
+  Format(buffer, sizeof(buffer), "server_%s", name);
+  set_json_string(baseJson, "event_type", buffer);
   char server_auth_id[64];
   GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
-  set_json_string(json, "server_auth_id", server_auth_id);
-  set_json_int(json, "steam_server_id", GetServerSteamAccountId());
-  json_object_set_new(json, "timestamp", json_integer(GetTime()));
+  set_json_string(baseJson, "server_auth_id", server_auth_id);
+  set_json_int(baseJson, "steam_server_id", GetServerSteamAccountId());
+  json_object_set_new(baseJson, "timestamp", json_integer(GetTime()));
 
   char current_map[32];
   GetCurrentMap(current_map, sizeof(current_map));
-  set_json_string(json, "map", current_map);
+  set_json_string(baseJson, "map", current_map);
 
-  return json;
+  return baseJson;
 }
+
 
 /**
  * Called when the plugin is fully initialized and all known external references
@@ -61,7 +64,126 @@ public void OnPluginStart()
    HookEvent("player_info", Event_PlayerInfo);
    HookEvent("player_disconnect", Event_PlayerDisconnect);
    HookEvent("player_activate", Event_PlayerActivate);
+   HookEvent("player_team", Event_PlayerTeam);
+   HookEvent("round_start", Event_RoundStart);
+   HookEvent("round_end", Event_RoundEnd);
+   HookEvent("game_newmap", Event_NewMap);
+   HookEvent("game_start", Event_GameStart);
+   HookEvent("game_end", Event_GameEnd);
+   HookEvent("begin_new_match", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("cs_intermission", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_poststart", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_officially_ended", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_freeze_end", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("cs_game_disconnected", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_announce_match_start", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_announce_last_round_half", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_announce_match_point", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_announce_match_start", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("round_time_warning", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("cs_match_end_restart", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("cs_pre_restart", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("client_disconnect", Event_General, EventHookMode_PostNoCopy);
+
    //HookEvent("other_death", Event_OtherDeath);
+}
+
+public void Event_General(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  LogChallengerAction(json)
+}
+
+//https://wiki.alliedmods.net/Generic_Source_Events#round_end
+public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  int winner_id = event.GetInt("winner");
+  char winning_team_name[32];
+  GetTeamName(winner_id, winning_team_name, sizeof(winning_team_name));
+  set_json_string(json, "winning_team_name", winning_team_name);
+  set_json_int(json, "winner_id", winner_id);
+  int reason = event.GetInt("reason");
+  set_json_int(json, "reason", reason);
+  char message[128];
+  event.GetString("message", message, sizeof(message));
+  set_json_string(json, "message", message);
+  LogChallengerAction(json);
+}
+
+//https://wiki.alliedmods.net/Generic_Source_Events#game_newmap
+public void Event_NewMap(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  char map_name[64];
+  event.GetString("mapname", map_name, sizeof(map_name));
+  LogChallengerAction(json);
+}
+
+//https://wiki.alliedmods.net/Generic_Source_Events#round_start
+public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  set_json_int(json, "time_limit", event.GetInt("timelimit"));
+  set_json_int(json, "frag_limit", event.GetInt("fraglimit"));
+  char objective[128];
+  event.GetString("objective", objective, sizeof(objective));
+  set_json_string(json, "objective", objective);
+  LogChallengerAction(json);
+}
+
+//https://wiki.alliedmods.net/Generic_Source_Events#game_start
+public void Event_GameStart(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  set_json_int(json, "rounds_limit", event.GetInt("roundslimit"));
+  set_json_int(json, "time_limit", event.GetInt("timelimit"));
+  set_json_int(json, "frag_limit", event.GetInt("fraglimit"));
+  char objective[128];
+  event.GetString("objective", objective, sizeof(objective));
+  set_json_string(json, "objective", objective);
+  LogChallengerAction(json);
+}
+
+//https://wiki.alliedmods.net/Generic_Source_Events#player_team
+public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  int user_id = event.GetInt("userid");
+  int user_client = GetClientOfUserId(user_id);
+  if (!IsFakeClient(user_client)){
+    //if not a bot, go grab more data...
+    char user_steam_id[64]
+    if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
+      set_json_string(json, "user_steam_id", user_steam_id);
+      int old_team = event.GetInt("oldteam");
+      int new_team = event.GetInt("newteam");
+      set_json_bool(json, "disconnect", event.GetBool("disconnect"));
+      char old_team_name[32];
+      GetTeamName(old_team, old_team_name, sizeof(old_team_name));
+      set_json_string(json, "old_team_name", old_team_name);
+      char new_team_name[32];
+      GetTeamName(new_team, new_team_name, sizeof(new_team_name));
+      set_json_string(json, "new_team_name", new_team_name);
+      LogChallengerAction(json);
+    }
+  }
+}
+
+//https://wiki.alliedmods.net/Generic_Source_Events#game_end
+public void Event_GameEnd(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  int winner_id = event.GetInt("winner");
+  char winning_team_name[32];
+  GetTeamName(winner_id, winning_team_name, sizeof(winning_team_name));
+  set_json_string(json, "winning_team_name", winning_team_name);
+
+  set_json_int(json, "time_limit", event.GetInt("timelimit"));
+  set_json_int(json, "frag_limit", event.GetInt("fraglimit"));
+  char objective[128];
+  event.GetString("objective", objective, sizeof(objective));
+  set_json_string(json, "objective", objective);
+  LogChallengerAction(json);
+}
+
+public void GetClientTeamByUserId(int client_id, char[] team_name, int max_length){
+  int client = GetClientOfUserId(client_id);
+  int team_id = GetClientTeam(client);
+  GetTeamName(team_id, team_name, max_length);
 }
 
 public void Event_PlayerActivate(Event event, const char[] name, bool dontBroadcast){
@@ -71,12 +193,13 @@ public void Event_PlayerActivate(Event event, const char[] name, bool dontBroadc
     //if not a bot, go grab more data...
     char user_steam_id[64]
     if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
-      Handle json = getBaseResponse("server_player_activate");
+      Handle json = getBaseResponse(name);
       set_json_int(json, "user_id", user_id);
+      char team_name[32];
+      GetClientTeamByUserId(user_id, team_name, sizeof(team_name))
+      set_json_string(json, "team_name", team_name);
       set_json_string(json, "user_steam_id", user_steam_id);
-      char buffer[4096];
-      json_dump(json, buffer, sizeof(buffer));
-      LogChallengerAction("server_player_activate", buffer);
+      LogChallengerAction(json);
     }
   }
 }
@@ -85,8 +208,8 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
 {
   int user_id = event.GetInt("userid");
   int user_client = GetClientOfUserId(user_id);
-  if (!IsFakeClient(user_client)){
-    Handle json = getBaseResponse("server_player_connect");
+  if (user_client != 0 && !IsFakeClient(user_client)){
+    Handle json = getBaseResponse(name);
 
     char connect_name[64];
     event.GetString("name", connect_name, sizeof(connect_name));
@@ -98,6 +221,10 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
 
+    char team_name[32];
+    GetClientTeamByUserId(user_id, team_name, sizeof(team_name))
+    set_json_string(json, "team_name", team_name);
+
     char steam_id[64];
     GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
     set_json_string(json, "steam_id", steam_id);
@@ -107,9 +234,7 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
     set_json_string(json, "address", address);
     set_json_int(json, "bot", event.GetInt("bot"));
 
-    char buffer[8192];
-    json_dump(json, buffer, sizeof(buffer));
-    LogChallengerAction("server_player_connect", buffer);
+    LogChallengerAction(json);
   }
 }
 
@@ -118,7 +243,7 @@ public void Event_PlayerInfo(Event event, const char[] name, bool dontBroadcast)
   int user_id = event.GetInt("userid");
   int user_client = GetClientOfUserId(user_id);
   if (!IsFakeClient(user_client)){
-    Handle json = getBaseResponse("server_player_info");
+    Handle json = getBaseResponse(name);
 
     char disconnect_name[64];
     event.GetString("name", disconnect_name, sizeof(disconnect_name));
@@ -128,14 +253,15 @@ public void Event_PlayerInfo(Event event, const char[] name, bool dontBroadcast)
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
 
+    char team_name[32];
+    GetClientTeamByUserId(user_id, team_name, sizeof(team_name))
+    set_json_string(json, "team_name", team_name);
+
     char steam_id[64];
     GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
     set_json_string(json, "steam_id", steam_id);
     set_json_int(json, "bot", event.GetInt("bot"));
-
-    char buffer[8192];
-    json_dump(json, buffer, sizeof(buffer));
-    LogChallengerAction("server_player_info", buffer);
+    LogChallengerAction(json);
   }
 }
 
@@ -144,7 +270,7 @@ public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroa
   int user_id = event.GetInt("userid");
   int user_client = GetClientOfUserId(user_id);
   if (!IsFakeClient(user_client)){
-    Handle json = getBaseResponse("server_player_disconnect");
+    Handle json = getBaseResponse(name);
     set_json_int(json, "user_id", event.GetInt("userid"));
     char reason[32];
     event.GetString("reason", reason, sizeof(reason));
@@ -153,14 +279,15 @@ public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroa
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
 
+    char team_name[32];
+    GetClientTeamByUserId(user_id, team_name, sizeof(team_name))
+    set_json_string(json, "team_name", team_name);
+
     char steam_id[64];
     GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
     set_json_string(json, "steam_id", steam_id);
     set_json_int(json, "bot", event.GetInt("bot"));
-
-    char buffer[8192];
-    json_dump(json, buffer, sizeof(buffer));
-    LogChallengerAction("server_player_disconnect", buffer);
+    LogChallengerAction(json);
   }
 }
 
@@ -172,7 +299,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
    int victim_client = GetClientOfUserId(victim_id);
    int attacker_client = GetClientOfUserId(attacker_id);
    int assister_id = event.GetInt("assister");
-   Handle json = getBaseResponse("server_player_death");
+   Handle json = getBaseResponse(name);
 
    if(assister_id != 0){
      int assister_client = GetClientOfUserId(assister_id);
@@ -180,6 +307,10 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
      set_json_int(json, "assister_armor", GetClientArmor(assister_client));
      set_json_int(json, "assister_deaths", GetClientDeaths(assister_client));
      set_json_int(json, "assister_health", GetClientHealth(assister_client));
+
+     char assister_team_name[32];
+     GetClientTeamByUserId(assister_id, assister_team_name, sizeof(assister_team_name))
+     set_json_string(json, "assister_team_name", assister_team_name);
 
      char assister_weapon[64];
      GetClientWeapon(assister_client, assister_weapon, sizeof(assister_weapon));
@@ -213,6 +344,10 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
    }
    set_json_int(json, "victim_serial", GetClientSerial(victim_client));
    set_json_int(json, "victim_armor", GetClientArmor(victim_client));
+
+   char victim_team_name[32];
+   GetClientTeamByUserId(victim_id, victim_team_name, sizeof(victim_team_name))
+   set_json_string(json, "victim_team_name", victim_team_name);
    set_json_int(json, "victim_deaths", GetClientDeaths(victim_client));
    if (!IsFakeClient(victim_client)){
      set_json_float(json, "victim_client_time", GetClientTime(victim_client));
@@ -243,6 +378,10 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
    set_json_int(json, "attacker_armor", GetClientArmor(attacker_client));
    set_json_int(json, "attacker_deaths", GetClientDeaths(attacker_client));
    set_json_int(json, "attacker_health", GetClientHealth(attacker_client));
+
+   char attacker_team[32];
+   GetClientTeamByUserId(attacker_id, attacker_team, sizeof(attacker_team))
+   set_json_string(json, "attacker_team", attacker_team);
    if (!IsFakeClient(attacker_client)){
      set_json_float(json, "attacker_client_time", GetClientTime(attacker_client));
      char attacker_ip[21];
@@ -258,16 +397,18 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
    set_json_int(json, "dominated", event.GetInt("dominated", 0));
    set_json_int(json, "revenge", event.GetInt("revenge", 0));
    set_json_int(json, "penetrated", event.GetInt("penetrated", 0));
-
-   char buffer[8192];
-   json_dump(json, buffer, sizeof(buffer));
-   LogChallengerAction("server_player_death", buffer);
+   LogChallengerAction(json);
 }
 
 
-public void LogChallengerAction(char[] name, char[] message) {
-  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), name, "v0.1.1", message);
-  LogActionToHttp(name, message);
+public void LogChallengerAction(Handle jsonLog) {
+  char event_type[32];
+  Handle evt_type = json_object_get(jsonLog, "event_type");
+  json_string_value(evt_type, event_type, sizeof(event_type));
+  char message[8196];
+  json_dump(jsonLog, message, sizeof(message));
+  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), event_type, "v0.1.1", message);
+  LogActionToHttp(event_type, message);
 }
 
 public void LogActionToHttp(char[] name, char[] message){
