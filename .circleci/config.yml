@@ -67,16 +67,17 @@ jobs:
           name: tag and push ServerBrowser_BGProcessor Docker image
           command: |
             $(aws ecr get-login --no-include-email)
-            docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1}
-            docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1}
-            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_TAG}
+            docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} &
+            docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} &
+            wait
+            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_TAG} 
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_TAG}
 
 workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build_container:
+      - build_gameserver:
           context: challenger_aws_prod
           filters:
             tags:
