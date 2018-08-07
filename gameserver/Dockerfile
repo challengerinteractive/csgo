@@ -3,10 +3,6 @@ FROM ubuntu:16.04
 ENV LAST_UPDATED_AT 2018-07-31
 
 ADD https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz /tmp/steamcmd_linux.tar.gz
-ADD https://sm.alliedmods.net/smdrop/1.9/sourcemod-1.9.0-git6247-linux.tar.gz /tmp/sourcemod.tar.gz
-ADD https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git965-linux.tar.gz /tmp/metamod.tar.gz
-ADD http://users.alliedmods.net/~kyles/builds/SteamWorks/SteamWorks-git128-linux.tar.gz /tmp/steamworks.tar.gz
-ADD smjansson_2.3.1.3_binaries.zip /tmp/smjansson.zip
 
 RUN apt-get update && \
 # install dependencies
@@ -17,9 +13,13 @@ RUN apt-get update && \
     mkdir -p /csgo/csgo/logs && \
     tar -zxvf /tmp/steamcmd_linux.tar.gz -C /steamcmd
 
-RUN cd /steamcmd && \
-# install csgo via steamcmd
-    ./steamcmd.sh +login anonymous +force_install_dir /csgo +app_update 740 validate +quit
+WORKDIR /steamcmd
+RUN ./steamcmd.sh +login anonymous +force_install_dir /csgo +app_update 740 validate +quit
+
+ADD https://sm.alliedmods.net/smdrop/1.9/sourcemod-1.9.0-git6247-linux.tar.gz /tmp/sourcemod.tar.gz
+ADD https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git965-linux.tar.gz /tmp/metamod.tar.gz
+ADD http://users.alliedmods.net/~kyles/builds/SteamWorks/SteamWorks-git128-linux.tar.gz /tmp/steamworks.tar.gz
+ADD smjansson_2.3.1.3_binaries.zip /tmp/smjansson.zip
 
     # decompress metamod on top of csgo
 RUN tar -xvf /tmp/metamod.tar.gz -C /csgo/csgo && \
