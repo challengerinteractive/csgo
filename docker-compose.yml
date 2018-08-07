@@ -1,7 +1,6 @@
 version: '3'
 services:
   csgo-server:
-    build: ./gameserver
     image: 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:latest
     deploy:
       replicas: 1
@@ -16,7 +15,6 @@ services:
     networks:
       - local
   event-forwarder:
-    build: ./event_forwarder
     image: 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
     env_file: docker-compose.env
     deploy:

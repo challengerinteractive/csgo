@@ -15,12 +15,14 @@ RUN apt-get update && \
 # get steamcmd
     mkdir /steamcmd && \
     mkdir -p /csgo/csgo/logs && \
-    tar -zxvf /tmp/steamcmd_linux.tar.gz -C /steamcmd && \
-    cd /steamcmd && \
+    tar -zxvf /tmp/steamcmd_linux.tar.gz -C /steamcmd
+
+RUN cd /steamcmd && \
 # install csgo via steamcmd
-    ./steamcmd.sh +login anonymous +force_install_dir /csgo +app_update 740 validate +quit && \
-# decompress metamod on top of csgo
-    tar -xvf /tmp/metamod.tar.gz -C /csgo/csgo && \
+    ./steamcmd.sh +login anonymous +force_install_dir /csgo +app_update 740 validate +quit
+
+    # decompress metamod on top of csgo
+RUN tar -xvf /tmp/metamod.tar.gz -C /csgo/csgo && \
 # decompress sourcemod on top of csgo
     tar -xvf /tmp/sourcemod.tar.gz -C /csgo/csgo && \
 # decompress steamworks on top of csgo
@@ -36,11 +38,9 @@ COPY containerfs /
 
 WORKDIR /csgo/csgo/addons/sourcemod/scripting
 RUN ./compile.sh challenger-telemetry.sp && \
-    mv compiled/challenger-telemetry.smx ../plugins/
-
-# Fix for missing library
-RUN mkdir /root/.steam/sdk32
-RUN ln -s /steamcmd/linux32/steamclient.so /root/.steam/sdk32/steamclient.so
+    mv compiled/challenger-telemetry.smx ../plugins/ && \
+    mkdir /root/.steam/sdk32 && \
+    ln -s /steamcmd/linux32/steamclient.so /root/.steam/sdk32/steamclient.so
 
 WORKDIR /csgo
 

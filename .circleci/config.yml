@@ -23,7 +23,7 @@ jobs:
           command: |
             $(aws ecr get-login --no-include-email)
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:latest
-            docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo
+            docker --log-level debug push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo
   build_eventforwarder:
     working_directory: ~/csgo
     docker:
