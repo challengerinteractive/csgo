@@ -14,14 +14,13 @@ jobs:
             apk -Uuv add groff less python py-pip
             pip install awscli
       - run:
-          name: Build ServerBrowser_BGProcessor Docker image
+          name: Build cs:go game image
           command: |
             cd gameserver
             docker build -t 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} .
       - run:
-          name: tag and push ServerBrowser_BGProcessor Docker image
+          name: tag and push csgo game server image
           command: |
-            cd gameserver
             $(aws ecr get-login --no-include-email)
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:latest
             docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo
@@ -39,12 +38,12 @@ jobs:
             apk -Uuv add groff less python py-pip
             pip install awscli
       - run:
-          name: Build ServerBrowser_BGProcessor Docker image
+          name: Build Event forwarder Docker image
           command: |
-            cd gameserver
+            cd event_forwarder
             docker build -t 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} .
       - run:
-          name: tag and push ServerBrowser_BGProcessor Docker image
+          name: tag and push event forwarder Docker image
           command: |
             cd gameserver
             $(aws ecr get-login --no-include-email)
@@ -64,15 +63,22 @@ jobs:
             apk -Uuv add groff less python py-pip
             pip install awscli
       - run:
-          name: tag and push ServerBrowser_BGProcessor Docker image
+          name: pull, re-tag and push images
           command: |
             $(aws ecr get-login --no-include-email)
             docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} &
             docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} &
+            echo "Waiting for pulls to complete"
             wait
-            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_TAG} 
-            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_TAG}
-
+            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_TAG} &
+            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_TAG} &
+            echo "Waiting for tags to complete"
+            wait
+            docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_TAG} &
+            docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_TAG} &
+            echo "Waiting for pushes to complete"
+            wait
+            echo "Re-tag complete..."
 workflows:
   version: 2
   build_and_publish:
