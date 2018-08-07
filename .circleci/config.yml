@@ -20,6 +20,7 @@ jobs:
             docker build -t 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} .
       - run:
           name: tag and push csgo game server image
+          no_output_timeout: 1800
           command: |
             $(aws ecr get-login --no-include-email)
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:latest
