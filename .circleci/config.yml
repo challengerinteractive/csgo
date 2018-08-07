@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build_container:
+  build_gameserver:
     working_directory: ~/csgo
     docker:
       - image: docker:17.11.0-ce-git
@@ -16,18 +16,72 @@ jobs:
       - run:
           name: Build ServerBrowser_BGProcessor Docker image
           command: |
+            cd gameserver
             docker build -t 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} .
       - run:
           name: tag and push ServerBrowser_BGProcessor Docker image
           command: |
+            cd gameserver
             $(aws ecr get-login --no-include-email)
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:latest
             docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo
+  build_eventforwarder:
+    working_directory: ~/csgo
+    docker:
+      - image: docker:17.11.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 17.11.0-ce
+      - run:
+          name: install AWS Cli
+          command: |
+            apk -Uuv add groff less python py-pip
+            pip install awscli
+      - run:
+          name: Build ServerBrowser_BGProcessor Docker image
+          command: |
+            cd gameserver
+            docker build -t 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} .
+      - run:
+          name: tag and push ServerBrowser_BGProcessor Docker image
+          command: |
+            cd gameserver
+            $(aws ecr get-login --no-include-email)
+            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
+            docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder
+  publish_tag:
+    working_directory: ~/csgo
+    docker:
+      - image: docker:17.11.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 17.11.0-ce
+      - run:
+          name: install AWS Cli
+          command: |
+            apk -Uuv add groff less python py-pip
+            pip install awscli
+      - run:
+          name: tag and push ServerBrowser_BGProcessor Docker image
+          command: |
+            $(aws ecr get-login --no-include-email)
+            docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1}
+            docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1}
+            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_TAG}
+            docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:${CIRCLE_TAG}
+
 workflows:
   version: 2
   build_and_publish:
     jobs:
       - build_container:
+          context: challenger_aws_prod
+          filters:
+            tags:
+              ignore: /^v.*/
+      - build_eventforwarder:
           context: challenger_aws_prod
           filters:
             tags:

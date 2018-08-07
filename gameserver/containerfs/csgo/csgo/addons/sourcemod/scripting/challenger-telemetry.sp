@@ -227,7 +227,7 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
 
     char steam_id[64];
     GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
-    set_json_string(json, "steam_id", steam_id);
+    set_json_string(json, "user_steam_id", steam_id);
 
     char address[32];
     event.GetString("address", address, sizeof(address));
@@ -259,7 +259,7 @@ public void Event_PlayerInfo(Event event, const char[] name, bool dontBroadcast)
 
     char steam_id[64];
     GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
-    set_json_string(json, "steam_id", steam_id);
+    set_json_string(json, "user_steam_id", steam_id);
     set_json_int(json, "bot", event.GetInt("bot"));
     LogChallengerAction(json);
   }
@@ -285,7 +285,7 @@ public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroa
 
     char steam_id[64];
     GetClientAuthId(user_client, AuthId_SteamID64, steam_id, sizeof(steam_id));
-    set_json_string(json, "steam_id", steam_id);
+    set_json_string(json, "user_steam_id", steam_id);
     set_json_int(json, "bot", event.GetInt("bot"));
     LogChallengerAction(json);
   }
