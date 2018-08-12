@@ -381,7 +381,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 
    char attacker_team[32];
    GetClientTeamByUserId(attacker_id, attacker_team, sizeof(attacker_team))
-   set_json_string(json, "attacker_team", attacker_team);
+   set_json_string(json, "attacker_team_name", attacker_team);
    if (!IsFakeClient(attacker_client)){
      set_json_float(json, "attacker_client_time", GetClientTime(attacker_client));
      char attacker_ip[21];
