@@ -1,8 +1,8 @@
 #!/bin/bash
 
 export SERVER_HOSTNAME="${SERVER_HOSTNAME:-An Amazing CSGO Server}"
-export RCON_PASSWORD="${RCON_PASSWORD:-changeme}"
-export STEAM_ACCOUNT="${STEAM_ACCOUNT:-changeme}"
+export RCON_PASSWORD="${RCON_PASSWORD:-}"
+export STEAM_ACCOUNT="${STEAM_ACCOUNT:-}"
 export CSGO_DIR="${CSGO_DIR:-/csgo}"
 export IP="${IP:-0.0.0.0}"
 export PORT="${PORT:-27015}"
@@ -14,6 +14,8 @@ export MAPGROUP="${MAPGROUP:-mg_active}"
 export MAXPLAYERS="${MAXPLAYERS:-12}"
 export FRIENDLY_FIRE="${FRIENDLY_FIRE:1}"
 export SERVER_TAGS="ChallengerVault"
+export SRCDS_EXTRA_ARGS="${SRCDS_EXTRA_ARGS:-}"
+export $CSGO_SERVER_CFG_EXTRA_OPTIONS="${CSGO_SERVER_CFG_EXTRA_OPTIONS:-}"
 
 #Value	Location
 #0	US - East
@@ -58,6 +60,7 @@ sv_logfile “1″ //Log server information in the log file.
 sv_logflush “0″ //Flush the log file to disk on each write (slow).
 mp_friendlyfire “$FRIENDLY_FIRE″ //Enable Friendly Fire 1 =Enable 0 =Disable
 sv_tags "$SERVER_TAGS"
+$CSGO_SERVER_CFG_EXTRA_OPTIONS
 SERVERCFG
 
 ./srcds_run \
@@ -74,4 +77,5 @@ SERVERCFG
     +map $MAP \
     +ip $IP \
     +sv_setsteamaccount $STEAM_ACCOUNT \
-    +rcon_password $RCON_PASSWORD
+    +rcon_password $RCON_PASSWORD \
+    $SRCDS_EXTRA_ARGS
