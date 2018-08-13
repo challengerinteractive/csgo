@@ -9,7 +9,7 @@
 #include "challenger/jsonhelpers.sp"
 
 new Handle:PostUrl = INVALID_HANDLE;
-new Handle:MatchID = INVALID_HANDLE;
+new Handle:MatchId = INVALID_HANDLE;
 
 /**
  * Declare this as a struct in your plugin to expose its information.
@@ -59,7 +59,7 @@ public Handle getBaseResponse(const char[] name){
  */
 public void OnPluginStart()
 {
-   MatchId = CreateConVar("challenger_MatchID", "default_match_id", "The Match ID used for reporting updates to the Challenger Vault system.");
+   MatchId = CreateConVar("challenger_MatchId", "default_match_id", "The Match ID used for reporting updates to the Challenger Vault system.");
    PostUrl = CreateConVar("challenger_PostUrl", "http://logging_server:5000", "The Url the events will be posted to.");
    AutoExecConfig(true, "challenger");
    HookEvent("player_death", Event_PlayerDeath);
@@ -102,7 +102,7 @@ public void Event_BeginNewMatch(Event event, const char[] name, bool dontBroadca
   GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
   char buffer[156];
   Format(buffer, sizeof(buffer), "%s-%d", name, GetTime());
-  SetConVarString(MatchID, buffer, false, false);
+  SetConVarString(MatchId, buffer, false, false);
   set_json_string(json, "match_id", buffer); 
   LogChallengerAction(json)
 }
