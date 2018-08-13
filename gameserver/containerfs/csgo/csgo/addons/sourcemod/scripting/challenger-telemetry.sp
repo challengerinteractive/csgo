@@ -16,7 +16,7 @@ new Handle:PostUrl = INVALID_HANDLE;
 public Plugin myinfo =
 {
     name = "Challenger Telemetry Plugin",
-    author = "Patrick McClory <pmdev@introspectdat.com>",
+    author = "Patrick McClory <pmdev@introspectdata.com>",
     description = "Event-based telemetry forwarder for ChallengerVault application",
     version = "0.1.1",
     url = "https://github.com/challengerinteractive/csgo"
