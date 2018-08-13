@@ -10,6 +10,7 @@
 
 new Handle:PostUrl = INVALID_HANDLE;
 new Handle:MatchId = INVALID_HANDLE;
+new Handle:RoundId = INVALID_HANDLE;
 
 /**
  * Declare this as a struct in your plugin to expose its information.
@@ -35,6 +36,8 @@ public Handle getBaseResponse(const char[] name){
   json_object_set_new(baseJson, "timestamp", json_integer(GetTime()));
   char match_id[156];
   GetConVarString(MatchId, match_id, sizeof(match_id));
+  char round_id[156];
+  GetConVarString(RoundId, round_id, sizeof(round_id));
   char current_map[32];
   GetCurrentMap(current_map, sizeof(current_map));
   set_json_string(baseJson, "map", current_map);
@@ -60,6 +63,7 @@ public Handle getBaseResponse(const char[] name){
 public void OnPluginStart()
 {
    MatchId = CreateConVar("challenger_MatchId", "default_match_id", "The Match ID used for reporting updates to the Challenger Vault system.");
+   RoundId = CreateConVar("challenger_RoundId", "default_round_id", "The Round ID used for reporting updates to the Challenger Vault system.");
    PostUrl = CreateConVar("challenger_PostUrl", "http://logging_server:5000", "The Url the events will be posted to.");
    AutoExecConfig(true, "challenger");
    HookEvent("player_death", Event_PlayerDeath);
@@ -100,8 +104,8 @@ public void Event_BeginNewMatch(Event event, const char[] name, bool dontBroadca
   Handle json = getBaseResponse(name);
   char server_auth_id[64];
   GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
-  char buffer[156];
-  Format(buffer, sizeof(buffer), "%s-%d", name, GetTime());
+  char buffer[162];
+  Format(buffer, sizeof(buffer), "match-%s-%d", name, GetTime());
   SetConVarString(MatchId, buffer, false, false);
   set_json_string(json, "match_id", buffer); 
   LogChallengerAction(json)
@@ -138,6 +142,14 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
   Handle json = getBaseResponse(name);
   set_json_int(json, "time_limit", event.GetInt("timelimit"));
   set_json_int(json, "frag_limit", event.GetInt("fraglimit"));
+  
+  char server_auth_id[64];
+  GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
+  char buffer[162];
+  Format(buffer, sizeof(buffer), "round-%s-%d", name, GetTime());
+  SetConVarString(RoundId, buffer, false, false);
+  set_json_string(json, "round_id", buffer); 
+
   char objective[128];
   event.GetString("objective", objective, sizeof(objective));
   set_json_string(json, "objective", objective);
