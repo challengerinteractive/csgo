@@ -36,8 +36,10 @@ public Handle getBaseResponse(const char[] name){
   json_object_set_new(baseJson, "timestamp", json_integer(GetTime()));
   char match_id[156];
   GetConVarString(MatchId, match_id, sizeof(match_id));
+  set_json_string(baseJson, "match_id", matchid);
   char round_id[156];
   GetConVarString(RoundId, round_id, sizeof(round_id));
+  set_json_string(baseJson, "round_id", round_id);
   char current_map[32];
   GetCurrentMap(current_map, sizeof(current_map));
   set_json_string(baseJson, "map", current_map);
