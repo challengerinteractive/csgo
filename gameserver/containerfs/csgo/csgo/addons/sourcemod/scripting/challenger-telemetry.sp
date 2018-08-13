@@ -9,6 +9,7 @@
 #include "challenger/jsonhelpers.sp"
 
 new Handle:PostUrl = INVALID_HANDLE;
+new Handle:MatchID = INVALID_HANDLE;
 
 /**
  * Declare this as a struct in your plugin to expose its information.
@@ -32,7 +33,8 @@ public Handle getBaseResponse(const char[] name){
   set_json_string(baseJson, "server_auth_id", server_auth_id);
   set_json_int(baseJson, "steam_server_id", GetServerSteamAccountId());
   json_object_set_new(baseJson, "timestamp", json_integer(GetTime()));
-
+  char match_id[156];
+  GetConVarString(MatchId, match_id, sizeof(match_id));
   char current_map[32];
   GetCurrentMap(current_map, sizeof(current_map));
   set_json_string(baseJson, "map", current_map);
@@ -57,6 +59,7 @@ public Handle getBaseResponse(const char[] name){
  */
 public void OnPluginStart()
 {
+   MatchId = CreateConVar("challenger_MatchID", "default_match_id", "The Match ID used for reporting updates to the Challenger Vault system.");
    PostUrl = CreateConVar("challenger_PostUrl", "http://logging_server:5000", "The Url the events will be posted to.");
    AutoExecConfig(true, "challenger");
    HookEvent("player_death", Event_PlayerDeath);
@@ -92,6 +95,19 @@ public void Event_General(Event event, const char[] name, bool dontBroadcast){
   Handle json = getBaseResponse(name);
   LogChallengerAction(json)
 }
+
+public void Event_BeginNewMatch(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  char server_auth_id[64];
+  GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
+  char buffer[156];
+  Format(buffer, sizeof(buffer), "%s-%d", name, GetTime());
+  SetConVarString(MatchID, buffer, false, false);
+  set_json_string(json, "match_id", buffer); 
+  LogChallengerAction(json)
+}
+
+
 
 //https://wiki.alliedmods.net/Generic_Source_Events#round_end
 public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast){
