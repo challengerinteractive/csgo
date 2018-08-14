@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SERVER_HOSTNAME="${SERVER_HOSTNAME:-An Amazing CSGO Server}"
+export SERVER_HOSTNAME="${SERVER_HOSTNAME:-ChallengerVault CSGO - Play and Win}"
 export RCON_PASSWORD="${RCON_PASSWORD:-}"
 export STEAM_ACCOUNT="${STEAM_ACCOUNT:-}"
 export CSGO_DIR="${CSGO_DIR:-/csgo}"
@@ -11,11 +11,12 @@ export GAME_TYPE="${GAME_TYPE:-0}"
 export GAME_MODE="${GAME_MODE:-1}"
 export MAP="${MAP:-de_dust2}"
 export MAPGROUP="${MAPGROUP:-mg_active}"
-export MAXPLAYERS="${MAXPLAYERS:-12}"
-export FRIENDLY_FIRE="${FRIENDLY_FIRE:1}"
-export SERVER_TAGS="ChallengerVault"
+export MAXPLAYERS="${MAXPLAYERS:-16}"
+export FRIENDLY_FIRE="${FRIENDLY_FIRE:0}"
+export SERVER_TAGS="${SERVER_TAGS:-ChallengerVault}"
 export SRCDS_EXTRA_ARGS="${SRCDS_EXTRA_ARGS:-}"
 export CSGO_SERVER_CFG_EXTRA_OPTIONS="${CSGO_SERVER_CFG_EXTRA_OPTIONS:-}"
+export BOT_JOIN_AFTER_PLAYER="${BOT_JOIN_AFTER_PLAYER:-0}"
 
 #Value	Location
 #0	US - East
@@ -28,7 +29,7 @@ export CSGO_SERVER_CFG_EXTRA_OPTIONS="${CSGO_SERVER_CFG_EXTRA_OPTIONS:-}"
 #7	Africa
 #255	World (default)
 
-export REGION_NUMBER="${REGION_NUMBER:1}"
+export REGION_NUMBER="${REGION_NUMBER:-1}"
 
 export CSGO_DIR="${CSGO_DIR:-/csgo}"
 
@@ -40,6 +41,7 @@ hostname "$SERVER_HOSTNAME"
 rcon_password ""
 sv_lan 0
 sv_cheats 0
+bot_join_after_player "$BOT_JOIN_AFTER_PLAYER"
 writeid
 writeip
 sv_allow_votes “1″ //Turns server voting on and off.
@@ -53,7 +55,7 @@ log on
 mp_logfile 1
 mp_logdetail 3
 mp_logmessages 1
-sv_log_onefile “1″ //Log server information to only one file.
+sv_log_onefile “0″ //Log server information to only one file.
 sv_logbans “1″ //Log server bans in the server logs.
 sv_logecho “1″ //Echo log information to the console.
 sv_logfile “1″ //Log server information in the log file.
