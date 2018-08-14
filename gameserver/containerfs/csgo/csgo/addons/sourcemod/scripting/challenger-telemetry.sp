@@ -79,7 +79,7 @@ public void OnPluginStart()
    HookEvent("game_newmap", Event_NewMap);
    HookEvent("game_start", Event_GameStart);
    HookEvent("game_end", Event_GameEnd);
-   HookEvent("begin_new_match", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("begin_new_match", Event_BeginNewMatch, EventHookMode_PostNoCopy);
    HookEvent("cs_intermission", Event_General, EventHookMode_PostNoCopy);
    HookEvent("round_poststart", Event_General, EventHookMode_PostNoCopy);
    HookEvent("round_officially_ended", Event_General, EventHookMode_PostNoCopy);
@@ -107,7 +107,7 @@ public void Event_BeginNewMatch(Event event, const char[] name, bool dontBroadca
   char server_auth_id[64];
   GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
   char buffer[162];
-  Format(buffer, sizeof(buffer), "match-%s-%d", name, GetTime());
+  Format(buffer, sizeof(buffer), "match-%s-%d", server_auth_id, GetTime());
   SetConVarString(MatchId, buffer, false, false);
   set_json_string(json, "match_id", buffer); 
   LogChallengerAction(json)
@@ -148,7 +148,7 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
   char server_auth_id[64];
   GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
   char buffer[162];
-  Format(buffer, sizeof(buffer), "round-%s-%d", name, GetTime());
+  Format(buffer, sizeof(buffer), "round-%s-%d", server_auth_id, GetTime());
   SetConVarString(RoundId, buffer, false, false);
   set_json_string(json, "round_id", buffer); 
 
