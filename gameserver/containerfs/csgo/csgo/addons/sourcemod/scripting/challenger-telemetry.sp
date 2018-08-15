@@ -257,10 +257,6 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
     event.GetString("name", connect_name, sizeof(connect_name));
     set_json_string(json, "name", connect_name);
 
-    char client_name[128];
-    GetClientName(user_client, client_name, sizeof(client_name));
-    set_json_string(json, "user_name", client_name);
-
     set_json_int(json, "user_id", user_id);
 
     char networkid[64];
