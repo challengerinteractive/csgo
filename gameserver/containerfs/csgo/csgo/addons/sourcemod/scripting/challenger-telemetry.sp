@@ -257,7 +257,11 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
     event.GetString("name", connect_name, sizeof(connect_name));
     set_json_string(json, "name", connect_name);
 
-    set_json_int(json, "user_id", event.GetInt("userid"));
+    char client_name[128];
+    GetClientName(user_client, client_name, sizeof(client_name));
+    set_json_string(json, "user_name", client_name);
+
+    set_json_int(json, "user_id", user_id);
 
     char networkid[64];
     event.GetString("networkid", networkid, sizeof(networkid));
@@ -323,6 +327,9 @@ public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroa
     char networkid[64];
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
+    char client_name[128];
+    GetClientName(user_client, client_name, sizeof(client_name));
+    set_json_string(json, "user_name", client_name);
 
     char team_name[32];
     GetClientTeamByUserId(user_id, team_name, sizeof(team_name))
