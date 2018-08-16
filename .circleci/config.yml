@@ -9,6 +9,9 @@ jobs:
       - setup_remote_docker:
           version: 17.11.0-ce
       - run:
+          name: get filesystem info
+          command: df
+      - run:
           name: install AWS Cli
           command: |
             apk -Uuv add groff less python py-pip
