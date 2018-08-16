@@ -20,7 +20,7 @@ public Plugin myinfo =
     name = "Challenger Telemetry Plugin",
     author = "Patrick McClory <pmdev@introspectdata.com>",
     description = "Event-based telemetry forwarder for ChallengerVault application",
-    version = "0.1.1",
+    version = "v0.1.1",
     url = "https://github.com/challengerinteractive/csgo"
 };
 
@@ -109,7 +109,7 @@ public void Event_BeginNewMatch(Event event, const char[] name, bool dontBroadca
   char buffer[162];
   Format(buffer, sizeof(buffer), "match-%s-%d", server_auth_id, GetTime());
   SetConVarString(MatchId, buffer, false, false);
-  set_json_string(json, "match_id", buffer); 
+  set_json_string(json, "match_id", buffer);
   LogChallengerAction(json)
 }
 
@@ -144,13 +144,13 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
   Handle json = getBaseResponse(name);
   set_json_int(json, "time_limit", event.GetInt("timelimit"));
   set_json_int(json, "frag_limit", event.GetInt("fraglimit"));
-  
+
   char server_auth_id[64];
   GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
   char buffer[162];
   Format(buffer, sizeof(buffer), "round-%s-%d", server_auth_id, GetTime());
   SetConVarString(RoundId, buffer, false, false);
-  set_json_string(json, "round_id", buffer); 
+  set_json_string(json, "round_id", buffer);
 
   char objective[128];
   event.GetString("objective", objective, sizeof(objective));
@@ -180,7 +180,7 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
     char user_steam_id[64]
     if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
       set_json_string(json, "user_steam_id", user_steam_id);
-      
+
       char client_name[128];
       GetClientName(user_client, client_name, sizeof(client_name));
       set_json_string(json, "user_name", client_name);
@@ -229,7 +229,7 @@ public void Event_PlayerActivate(Event event, const char[] name, bool dontBroadc
     if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
       Handle json = getBaseResponse(name);
       set_json_int(json, "user_id", user_id);
-      
+
       char client_name[128];
       GetClientName(user_client, client_name, sizeof(client_name));
       set_json_string(json, "user_name", client_name);
@@ -252,7 +252,7 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
     char client_name[128];
     GetClientName(user_client, client_name, sizeof(client_name));
     set_json_string(json, "user_name", client_name);
-    
+
     char connect_name[64];
     event.GetString("name", connect_name, sizeof(connect_name));
     set_json_string(json, "name", connect_name);
@@ -355,7 +355,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
      set_json_int(json, "assister_armor", GetClientArmor(assister_client));
      set_json_int(json, "assister_deaths", GetClientDeaths(assister_client));
      set_json_int(json, "assister_health", GetClientHealth(assister_client));
-     
+
      char assister_team_name[32];
      GetClientTeamByUserId(assister_id, assister_team_name, sizeof(assister_team_name))
      set_json_string(json, "assister_team_name", assister_team_name);
@@ -455,7 +455,7 @@ public void LogChallengerAction(Handle jsonLog) {
   json_string_value(evt_type, event_type, sizeof(event_type));
   char message[8196];
   json_dump(jsonLog, message, sizeof(message));
-  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), event_type, "v0.1.1", message);
+  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), event_type, PlInfo_Version, message);
   LogActionToHttp(event_type, message);
 }
 

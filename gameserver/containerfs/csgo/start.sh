@@ -4,6 +4,7 @@ export SERVER_HOSTNAME="${SERVER_HOSTNAME:-ChallengerVault CSGO - Play and Win}"
 export RCON_PASSWORD="${RCON_PASSWORD:-}"
 export STEAM_ACCOUNT="${STEAM_ACCOUNT:-}"
 export CSGO_DIR="${CSGO_DIR:-/csgo}"
+export STEAMCMD_DIR="${STEAMCMD_DIR:-/steamcmd}"
 export IP="${IP:-0.0.0.0}"
 export PORT="${PORT:-27015}"
 export TICKRATE="${TICKRATE:-128}"
@@ -12,7 +13,7 @@ export GAME_MODE="${GAME_MODE:-1}"
 export MAP="${MAP:-de_dust2}"
 export MAPGROUP="${MAPGROUP:-mg_active}"
 export MAXPLAYERS="${MAXPLAYERS:-16}"
-export FRIENDLY_FIRE="${FRIENDLY_FIRE:0}"
+export FRIENDLY_FIRE="${FRIENDLY_FIRE:-0}"
 export SERVER_TAGS="${SERVER_TAGS:-ChallengerVault}"
 export SRCDS_EXTRA_ARGS="${SRCDS_EXTRA_ARGS:-}"
 export CSGO_SERVER_CFG_EXTRA_OPTIONS="${CSGO_SERVER_CFG_EXTRA_OPTIONS:-}"
@@ -31,14 +32,30 @@ export BOT_JOIN_AFTER_PLAYER="${BOT_JOIN_AFTER_PLAYER:-0}"
 
 export REGION_NUMBER="${REGION_NUMBER:-1}"
 
-export CSGO_DIR="${CSGO_DIR:-/csgo}"
 
+echo ""
+echo "********************************************************************************"
+echo ""
+echo "    Running steamcmd update..."
+echo ""
+echo "********************************************************************************"
+echo ""
+cd $STEAMCMD_DIR
+./steamcmd.sh +login anonymous +force_install_dir $CSGO_DIR +app_update 740 validate +quit
+
+echo ""
+echo "********************************************************************************"
+echo ""
+echo "    Starting CSGO Server..."
+echo ""
+echo "********************************************************************************"
+echo ""
 cd $CSGO_DIR
 
 ### Create dynamic server config
 cat << SERVERCFG > $CSGO_DIR/csgo/cfg/server.cfg
 hostname "$SERVER_HOSTNAME"
-rcon_password ""
+rcon_password "$RCON_PASSWORD"
 sv_lan 0
 sv_cheats 0
 bot_join_after_player "$BOT_JOIN_AFTER_PLAYER"
@@ -61,6 +78,7 @@ sv_logecho “1″ //Echo log information to the console.
 sv_logfile “1″ //Log server information in the log file.
 sv_logflush “0″ //Flush the log file to disk on each write (slow).
 mp_friendlyfire “$FRIENDLY_FIRE″ //Enable Friendly Fire 1 =Enable 0 =Disable
+sv_region "$REGION_NUMBER"
 sv_tags "$SERVER_TAGS"
 $CSGO_SERVER_CFG_EXTRA_OPTIONS
 SERVERCFG
