@@ -47,6 +47,6 @@ if __name__ == "__main__":
         kinesis_client.put_record(
             StreamName=kinesis_stream,
             Data=json.dumps({'type': 'server', 'name':'server_start', 'ip': public_ip, 'name': os.getenv('SERVER_HOSTNAME')}),
-            PartitionKey='server'
+            PartitionKey=public_ip
         )
     app.run(port=5000, host='0.0.0.0')
