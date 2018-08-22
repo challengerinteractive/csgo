@@ -41,7 +41,7 @@ echo ""
 echo "********************************************************************************"
 echo ""
 cd $STEAMCMD_DIR
-./steamcmd.sh +login anonymous +force_install_dir $CSGO_DIR +app_update 740 validate +quit
+./steamcmd.sh +runscript $CSGO_DIR/csgo_ds.txt
 
 echo ""
 echo "********************************************************************************"
