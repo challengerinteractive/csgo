@@ -85,7 +85,7 @@ SERVERCFG
 
 ./srcds_run \
     -autoupdate \
-    -steam_dir $STEAMCMD_DIR \
+    -steam_dir $STEAMCMD_DIR/steamcmd.sh \
     -steamcmd_script $CSGO_DIR/csgo_ds.txt \
     -console \
     -usercon \
