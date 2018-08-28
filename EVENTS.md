@@ -31,7 +31,8 @@ The following are `event_types` for events pushed to AWS Kinesis from the CS:GO 
 	"payload": {
 		"timestamp": 1533169320,
 		"steam_server_id": 2409689,
-		"map": "de_dust2"
+		"map": "de_dust2",
+		"current_client_count": 5
 	}
 }
 ```
@@ -52,6 +53,7 @@ The following are `event_types` for events pushed to AWS Kinesis from the CS:GO 
     * timestamp - str(int) - in-game timestamp for when data grabbed from game - from [GetTime](https://sm.alliedmods.net/new-api/sourcemod/GetTime)
     * steam_server_id - str(int) - Steam ID of the owner of the server (of the server key used to run this instance) from [GetServerSteamAccountId](https://sm.alliedmods.net/new-api/halflife/GetServerSteamAccountId)
     * map - str - map name from [GetCurrentMap](https://sm.alliedmods.net/new-api/halflife/GetCurrentMap)
+    * current_client_count - int - number of clients currently connected to the game server
 
 
 ## `server_player_death`
@@ -124,7 +126,8 @@ Where `name` is one of ['victim', 'attacker', 'assister']
 		"attacker_armor": 95,
 		"attacker_serial": 5130,
 		"weapon": "ak47",
-		"revenge": 0
+		"revenge": 0,
+		"current_client_count": 5
 	}
 }
 ```
@@ -178,7 +181,8 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 		"attacker_armor": 0,
 		"weapon": "glock",
 		"dominated": 0,
-		"revenge": 0
+		"revenge": 0,
+		"current_client_count": 5
 	}
 }
 ```
@@ -233,7 +237,8 @@ In this example, 'patrick' is a real user (as evidenced by the `victim_steam_id`
 		"attacker_armor": 0,
 		"weapon": "glock",
 		"dominated": 0,
-		"revenge": 0
+		"revenge": 0,
+		"current_client_count": 5
 	}
 }
 ```
@@ -267,7 +272,8 @@ This event derives its data from the [`player_connect`](https://wiki.alliedmods.
 		"network_id": "STEAM_1:0:433057383",
 		"steam_id": "123309842141298321",
 		"map": "de_dust2",
-		"steam_server_id": 2409689
+		"steam_server_id": 2409689,
+		"current_client_count": 5
 	}
 }
 ```
@@ -307,7 +313,8 @@ This event derives its data from the [`player_disconnect`](https://wiki.alliedmo
 		"network_id": "STEAM_1:0:433057383",
 		"steam_id": "123309842141298321",
 		"user_id": 2,
-		"reason": "Disconnect"
+		"reason": "Disconnect",
+		"current_client_count": 5
 	}
 }
 ```
@@ -336,7 +343,8 @@ This event derives its data from the [`player_activate`](https://wiki.alliedmods
 	"payload": {
 		"user_id": 12,
 		"user_steam_id": "76561198826380494",
-		"steam_server_id": 2409689
+		"steam_server_id": 2409689,
+		"current_client_count": 5
 	}
 }
 ```
@@ -379,7 +387,8 @@ This event fires when a user changes teams.
 		"user_steam_id": "76561197978981763",
 		"disconnect": false,
 		"old_team_name": "CT",
-		"new_team_name": "Unassigned"
+		"new_team_name": "Unassigned",
+		"current_client_count": 5
 	}
 }
 ```
@@ -411,7 +420,8 @@ This event fires when a user changes teams.
 		"frag_limit": 0,
 		"steam_server_id": 2409689,
 		"timestamp": 1533266134,
-		"time_limit": 115
+		"time_limit": 115,
+		"current_client_count": 5
 	}
 }
 ```
@@ -444,7 +454,8 @@ This event fires when a user changes teams.
     "timestamp": 1533266044,
     "message": "#SFUI_Notice_Terrorists_Win",
     "winning_team_name": "TERRORIST",
-    "reason": 9
+    "reason": 9,
+		"current_client_count": 5
 	}
 }
 ```
