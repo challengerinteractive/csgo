@@ -43,7 +43,7 @@ public Handle getBaseResponse(const char[] name){
   char current_map[32];
   GetCurrentMap(current_map, sizeof(current_map));
   set_json_string(baseJson, "map", current_map);
-
+  set_json_int(baseJson, "current_client_count", GetClientCount(true));
   return baseJson;
 }
 
