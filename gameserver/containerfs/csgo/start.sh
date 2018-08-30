@@ -83,6 +83,8 @@ sv_tags "$SERVER_TAGS"
 $CSGO_SERVER_CFG_EXTRA_OPTIONS
 SERVERCFG
 
+sed -i 's/#!\/bin\/sh/#!\/bin\/bash/' srcds_run
+
 ./srcds_run \
     -autoupdate \
     -steam_dir /steamcmd/ \
