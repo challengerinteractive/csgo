@@ -52,6 +52,27 @@ jobs:
             $(aws ecr get-login --no-include-email)
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
             docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder
+  cycle_dev_gameservers:
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - run:
+          name: prep environment
+          command: |
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            ./run_redeploy_dev.sh
+  cycle_prod_gameservers:
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - run:
+          name: prep environment
+          command: |
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            ./run_redeploy_prod.sh
+
   publish_tag:
     working_directory: ~/csgo
     docker:
@@ -96,6 +117,23 @@ workflows:
           filters:
             tags:
               ignore: /^v.*/
+      - approve_dev_gameserver_deploy:
+          type: approval
+          requires:
+            - build_gameserver
+            - build_eventforwarder
+      - dev_gameserver_deploy:
+          context: csgo_server_dev
+          requires:
+            - approve_dev_gameserver_deploy
+      - approve_prod_gameserver_deploy:
+          type: approval
+          requires:
+            - dev_gameserver_deploy
+      - prod_gameserver_deploy:
+          context: csgo_server_prod
+          requires:
+            - approve_prod_gameserver_deploy
       - publish_tag:
           context: challenger_aws_prod
           filters:
