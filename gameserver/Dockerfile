@@ -24,7 +24,7 @@ ADD smjansson_2.3.1.3_binaries.zip /tmp/smjansson.zip
 
     # decompress metamod on top of csgo
 RUN wget https://sm.alliedmods.net/smdrop/1.9/$(curl https://sm.alliedmods.net/smdrop/1.9/sourcemod-latest-linux) -O /tmp/sourcemod.tar.gz && \
-    wget https://mms.alliedmods.net/mmsdrop/1.10/$(curl https://mms.alliedmods.net/mmsdrop/1.10/mmsource-latest-linux) /tmp/metamod.tar.gz -o /tmp/metamod.tar.gz && \
+    wget https://mms.alliedmods.net/mmsdrop/1.10/$(curl https://mms.alliedmods.net/mmsdrop/1.10/mmsource-latest-linux) -o /tmp/metamod.tar.gz && \
     tar -xvf /tmp/metamod.tar.gz -C /csgo/csgo && \
 # decompress sourcemod on top of csgo
     tar -xvf /tmp/sourcemod.tar.gz -C /csgo/csgo && \
