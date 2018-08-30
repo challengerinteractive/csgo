@@ -84,6 +84,11 @@ $CSGO_SERVER_CFG_EXTRA_OPTIONS
 SERVERCFG
 
 ./srcds_run \
+    -autoupdate \
+    -steam_dir /steamcmd/steamcmd.sh \
+    -steamcmd_script /csgo/csgo_ds.txt \
+    -steam \
+    -steamerr \
     -console \
     -usercon \
     -game csgo \
