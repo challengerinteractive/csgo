@@ -1,24 +1,20 @@
 version: '3'
 services:
   csgo-server:
-    image: patrickmcclory/csgo:latest
+    image: 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo:latest
     restart: unless-stopped
     env_file: docker-compose.env
     ports:
       - "0.0.0.0:27015:27015"
       - "0.0.0.0:27015:27015/udp"
-#    volumes:
-#      - /var/log/csgo:/csgo/csgo/logs
+    volumes:
+      - /var/log/csgo:/csgo/csgo/logs
     networks:
       - local
   event-forwarder:
     image: 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
     env_file: docker-compose.env
     restart: unless-stopped
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: always
     networks:
       local:
         aliases:
