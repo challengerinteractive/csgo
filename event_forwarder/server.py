@@ -24,7 +24,7 @@ def csgo():
                                 'name': 'cs:go',
                                 'type': 'fps',
                                 'platform': 'steam'},
-                       'server': {'ip': public_ip,
+                       'server': {'ip': public_ip + ':27015',
                                   'mode': os.getenv('GAME_MODE'),
                                   'type': os.getenv('GAME_TYPE'),
                                   'timestamp': str(time.time()),
