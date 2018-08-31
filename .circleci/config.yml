@@ -60,8 +60,9 @@ jobs:
       - run:
           name: prep environment
           command: |
-            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
-            chmod 400 deploy_rsa
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/deploy_rsa
+            chmod 400 ~/.ssh/deploy_rsa
             ./run_redeploy_dev.sh
   prod_gameserver_deploy:
     docker:
@@ -71,8 +72,9 @@ jobs:
       - run:
           name: prep environment
           command: |
-            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
-            chmod 400 deploy_rsa
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/deploy_rsa
+            chmod 400 ~/.ssh/deploy_rsa
             ./run_redeploy_prod.sh
 
   publish_tag:
