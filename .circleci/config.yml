@@ -52,7 +52,7 @@ jobs:
             $(aws ecr get-login --no-include-email)
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
             docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder
-  cycle_dev_gameservers:
+  dev_gameserver_deploy:
     docker:
       - image: circleci/python:3.6.5
     steps:
@@ -63,7 +63,7 @@ jobs:
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
             chmod 400 deploy_rsa
             ./run_redeploy_dev.sh
-  cycle_prod_gameservers:
+  prod_gameserver_deploy:
     docker:
       - image: circleci/python:3.6.5
     steps:
