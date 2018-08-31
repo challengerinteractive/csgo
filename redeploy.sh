@@ -75,3 +75,5 @@ echo "*"
 echo "*  Done with redeploy on $(curl -s http://169.254.169.254/latest/meta-data/public-ipv4) at $(date)"
 echo "*"
 echo "********************************************************************************"
+
+timeout 30s docker-compose logs -f
