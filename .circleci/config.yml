@@ -59,7 +59,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: prep environment
+          name: deploy dev gameservers via ssh
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
@@ -73,7 +73,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: prep environment
+          name: deploy production gameservers via ssh
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
@@ -117,7 +117,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: prep environment
+          name: reset dev gameservers via ssh
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
@@ -131,7 +131,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: prep environment
+          name: reset production gameservers via ssh
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
@@ -181,7 +181,7 @@ workflows:
     jobs:
       - approve_reset_dev:
           type: approval
-      - approve_reset_prod:
+      - APPROVE_RESET_PROD:
           type: approval
       - reset_dev:
           context: csgo_server_dev
@@ -190,4 +190,16 @@ workflows:
       - reset_prod:
           context: csgo_server_prod
           requires:
-            - approve_reset_prod
+            - APPROVE_RESET_PROD
+      - approve_redeploy_dev:
+          type: approval
+      - APPROVE_REDEPLOY_PROD:
+          type: approval
+      - dev_gameserver_deploy:
+          context: csgo_server_dev
+          requires:
+            - approve_redeploy_dev
+      - prod_gameserver_deploy:
+          context: csgo_server_prod
+          requires:
+            - APPROVE_REDEPLOY_PROD

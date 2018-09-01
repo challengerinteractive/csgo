@@ -1,75 +1,80 @@
-# CSGO
+# CSGO Dedicated Server
 
-The Dockerfile will build an image for running a Counter-Strike: Global Offensive dedicated server in a container.
+What's here:
 
-### Build image
+* Docker build for images
+* configuration files
 
-```bash
-docker build -t csgo-server .
-```
 
-_OR_
+## What goes into the setup for a server:
 
-```bash
-make
-```
+* a pre-built container running the CS:GO server as defined by the docker build in the `gameserver` directory of this repository
+* a `start.sh` script - separate for dev and prod:
+	* `start_dev.sh`
+	* `start_prod.sh`
+* a docker env file - one per machine with unique naming and configurations
+	* in the `_docker-compose.env` directory
 
-The game is ~16GB, so the initial build will take a bit to download, depending on your download speed. Subsequent builds on the same machine should take only a few seconds, assuming the initial build image is cached by docker.
 
-### Run a CSGO dedicated server
+## How do I?
 
-```bash
-docker run \
-	-d \
-	-p 27015:27015/tcp \
-	-p 27015:27015/udp \
-	-p 27020:27020/udp \
-	-p 27020:27020/tcp \
-	-e "SERVER_HOSTNAME=hostname" \
-	-e "SERVER_PASSWORD=password" \
-	-e "RCON_PASSWORD=rconpassword" \
-	-e "STEAM_ACCOUNT=gamelogintoken" \
-	csgo-server
-```
+### change the configuration of a single gameserver
 
-_OR_
+* find the appropriate environment file in `_docker-compose.env`
+* update the explicit settings that are called out
+* add any additional commands for the `srcds_run` command to the `SRCDS_EXTRA_ARGS` environment variable, add it if it's not present
 
-```bash
-make run
-```
+### build a new image for the CS:GO server
 
-Valve requires a "Game Login Token" to run public servers. Confusingly, this token is also referred to as a steam account (it gets set on the server using `sv_setsteamaccount`). To get one, visit http://steamcommunity.com/dev/managegameservers. You'll need one for each server.
+* if no code changes:
+ 	* go to [circleci](https://circleci.com/gh/challengerinteractive/workflows/csgo/tree/master)
+	* find the latest `build_and_publish` workflow
+	* rerun the workflow from the beginning
+* if code changes:
+	* commit code changes to `master` branch
+	* so long as the string `[skip ci]` is not in the commit message, circleci will build a new image
 
-## Environment variable overrides
+### How do I redeploy the gameserver container?
 
-Below are the default values for environment variables that control the server configuration. Pass one or more of these to docker using the `-e` argument (example above) to override.
+A 'redeploy' is the process of getting the latest game server docker image, removing the current running container and restarting with the new image. If you just need to restart (i.e. to try to manually run the steamcmd update process) then you might want to try asking how you reset a running server.
 
-```bash
-SERVER_HOSTNAME=An Amazing CSGO Server
-SERVER_PASSWORD=changeme
-RCON_PASSWORD=changeme
-STEAM_ACCOUNT=changeme
-CSGO_DIR=/csgo
-IP=0.0.0.0
-PORT=27015
-TICKRATE=128
-GAME_TYPE=0
-GAME_MODE=1
-MAP=de_dust2
-MAPGROUP=mg_active
-MAXPLAYERS=12
-```
+* servers are redeployable in groups - dev or prod only (for now)
+* go to [circleci](https://circleci.com/gh/challengerinteractive/workflows/csgo/tree/master)
+* find the latest 'master/operations-tasks' workflow
+* reset/rerun the workflow if it's been run before
+* approve the appropriate job (dev or prod) and it will run the reset workflow
+  * `approve_redeploy_dev`
+	* `APPROVE_REDEPLOY_PROD`
 
-See `containerfs/csgo/start.sh` to understand more. The command-line arguments are at the bottom of the file.
+### How do I reset a running server
 
-## Adding files, plugins, etc.
+A 'reset' is the process of stopping and restarting assets that are alredy in place. If you want to redeploy (get the latest image) you want to ask the question about how you redeploy things.
 
-The directory `containerfs` (container filesystem) is the equivalent of the root path (`/`). Any files or plugins you want to add, simply put them in the correct paths under `containerfs`, and they will appear in the same location in the container (except `containerfs` will be replaced with `/`).
+* servers are resettable in groups - dev or prod only (for now)
+* go to [circleci](https://circleci.com/gh/challengerinteractive/workflows/csgo/tree/master)
+* find the latest 'master/operations-tasks' workflow
+* reset/rerun the workflow if it's been run before
+* approve the appropriate job (dev or prod) and it will run the reset workflow
+  * `approve_reset_dev`
+	* `APPROVE_RESET_PROD`
 
-For example, by default, CSGO is installed in the root path `/csgo` within the docker image. I want my `matchmaking.cfg` file to live in the `cfg` directory, so I put that file in `containerfs/csgo/cfg/` and it appears in the right place inside the docker image (`/csgo/cfg/matchmaking.cfg`).
+### How do I add more servers
 
-## Google Compute Engine Metadata
-
-Passing `GOOGLE_METADATA=1` fetches default values for environment variables from Google Compute Engine's Project or Instance Metadata. Right now it defaults to project level, but you can simply override METADATA_URL to point to instance data.
-
-See https://cloud.google.com/compute/docs/storing-retrieving-metadata#querying.
+* Create a file in `_docker-compose.env` for it...
+	* you'll need to get a steam key for the server from [here](https://steamcommunity.com/dev/managegameservers)
+	* name it appropriately
+	* set up the game config (type/mode)
+* launch an AWS ec2 instance (ubuntu 16.04) with the bootstrap script [ubuntu-ec2-bootstrap.sh](ubuntu-ec2-bootstrap.sh) or run that script after launch
+	* make sure it's launched with the appropriate key (dev/prod)
+	* make sure it's in a public subnet and that the security group assigned has port 27000-27030 tcp and udp ingress enabled
+	* if unsure check with techops
+	* if new region, import existing key (publickey) into ec2 before launching
+	* dev and prod keys are available in 1password:
+		* [production key](https://challenger.1password.com/vaults/zcubfb473pr2zbubvtl6y72g5i/allitems/33efxa5munbexprp7j6orlvc7e)
+		* [dev key](https://challenger.1password.com/vaults/zcubfb473pr2zbubvtl6y72g5i/allitems/eslao72dsogpugyufpzkmca7su)
+* add the new server to the list (as appopriate) to the dev and prod scripts in this repo
+	* to the `run_redeploy_{env}.sh` and `run_redeploy_{env}.sh` files:
+		* for each step, add the new server following the same pattern
+		* the only step here that is unique per sever in any of these files is copying the env file created above
+* commit all the changes to github and get it to master... let circleci do it's job
+* NOTE: first deployments may take a little extra time (2-4 min) to build resources locally on machine (in docker and compose)... this is normal
