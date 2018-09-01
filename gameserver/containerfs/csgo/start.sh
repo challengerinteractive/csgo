@@ -86,10 +86,6 @@ SERVERCFG
 sed -i 's/#!\/bin\/sh/#!\/bin\/bash/' srcds_run
 
 ./srcds_run \
-    -autoupdate \
-    -steam_dir /steamcmd/ \
-    -steamcmd_script /csgo/csgo_ds.txt \
-    -steam \
     -steamerr \
     -console \
     -usercon \

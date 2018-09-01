@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "********************************************************************************"
 echo "*"
-echo "*  Copying PRODUCTION redeploy script to hosts"
+echo "*  Copying PRODUCTION redeploy script to hosts at $(date)"
 echo "*"
 echo "********************************************************************************"
 
@@ -12,7 +12,7 @@ scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deploy_rsa re
 wait
 echo "********************************************************************************"
 echo "*"
-echo "*  Modifying w/ +x to remote PRODUCTION redeploy.sh"
+echo "*  Modifying w/ +x to remote PRODUCTION redeploy.sh at $(date)"
 echo "*"
 echo "********************************************************************************"
 
@@ -24,7 +24,7 @@ wait
 
 echo "********************************************************************************"
 echo "*"
-echo "*  Running PRODUCTION redeploy.sh"
+echo "*  Running PRODUCTION redeploy.sh at $(date)"
 echo "*"
 echo "********************************************************************************"
 
@@ -33,3 +33,9 @@ ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deploy_rsa ub
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deploy_rsa ubuntu@ec2-18-232-142-175.compute-1.amazonaws.com "./redeploy.sh" &
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deploy_rsa ubuntu@ec2-34-230-60-12.compute-1.amazonaws.com "./redeploy.sh" &
 wait
+
+echo "********************************************************************************"
+echo "*"
+echo "*  Done running PRODUCTION redeploy.sh at $(date)"
+echo "*"
+echo "********************************************************************************"

@@ -64,6 +64,7 @@ jobs:
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
             chmod 400 deploy_rsa
+            chmod +x run_redeploy_dev.sh
             ./run_redeploy_dev.sh
   prod_gameserver_deploy:
     working_directory: ~/csgo
@@ -77,8 +78,8 @@ jobs:
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
             chmod 400 deploy_rsa
+            chmod +x run_redeploy_prod.sh
             ./run_redeploy_prod.sh
-
   publish_tag:
     working_directory: ~/csgo
     docker:
@@ -109,6 +110,35 @@ jobs:
             echo "Waiting for pushes to complete"
             wait
             echo "Re-tag complete..."
+  reset_dev:
+    working_directory: ~/csgo
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - run:
+          name: prep environment
+          command: |
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            chmod +x run_restart_prod.sh
+            ./run_restart_dev.sh
+  reset_prod:
+    working_directory: ~/csgo
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - run:
+          name: prep environment
+          command: |
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            chmod +x run_restart_prod.sh
+            ./run_restart_prod.sh
+
 workflows:
   version: 2
   build_and_publish:
@@ -147,3 +177,17 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
+  operations-tasks:
+    jobs:
+      - approve_reset_dev:
+          type: approval
+      - approve_reset_prod:
+          type: approval
+      - reset_dev:
+          context: csgo_server_dev
+          requires:
+            - approve_reset_dev
+      - reset_prod:
+          context: csgo_server_prod
+          requires:
+            - approve_reset_prod
