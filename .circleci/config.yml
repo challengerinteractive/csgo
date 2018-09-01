@@ -60,6 +60,7 @@ jobs:
       - checkout
       - run:
           name: deploy dev gameservers via ssh
+          no_output_timeout: 1800
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
@@ -74,6 +75,7 @@ jobs:
       - checkout
       - run:
           name: deploy production gameservers via ssh
+          no_output_timeout: 1800
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
@@ -95,6 +97,7 @@ jobs:
             pip install awscli
       - run:
           name: pull, re-tag and push images
+          no_output_timeout: 1800
           command: |
             $(aws ecr get-login --no-include-email)
             docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} &
@@ -118,6 +121,7 @@ jobs:
       - checkout
       - run:
           name: reset dev gameservers via ssh
+          no_output_timeout: 1800
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
@@ -132,6 +136,7 @@ jobs:
       - checkout
       - run:
           name: reset production gameservers via ssh
+          no_output_timeout: 1800
           command: |
             mkdir -p ~/.ssh
             echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
