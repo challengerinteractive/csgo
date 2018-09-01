@@ -17,7 +17,7 @@ export FRIENDLY_FIRE="${FRIENDLY_FIRE:-0}"
 export SERVER_TAGS="${SERVER_TAGS:-ChallengerVault}"
 export SRCDS_EXTRA_ARGS="${SRCDS_EXTRA_ARGS:-}"
 export CSGO_SERVER_CFG_EXTRA_OPTIONS="${CSGO_SERVER_CFG_EXTRA_OPTIONS:-}"
-export BOT_JOIN_AFTER_PLAYER="${BOT_JOIN_AFTER_PLAYER:-0}"
+export BOT_JOIN_AFTER_PLAYER="${BOT_JOIN_AFTER_PLAYER:-1}"
 
 #Value	Location
 #0	US - East
@@ -87,7 +87,7 @@ sed -i 's/#!\/bin\/sh/#!\/bin\/bash/' srcds_run
 
 ./srcds_run \
     -autoupdate \
-    -steam_dir /steamcmd/ \
+    -steam_dir /steamcmd/steamcmd.sh \
     -steamcmd_script /csgo/csgo_ds.txt \
     -steam \
     -steamerr \

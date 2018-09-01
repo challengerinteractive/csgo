@@ -56,13 +56,13 @@ jobs:
     docker:
       - image: circleci/python:3.6.5
     steps:
-      - checkout 
+      - checkout
       - run:
           name: prep environment
           command: |
             mkdir -p ~/.ssh
-            echo -n "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/deploy_rsa
-            chmod 400 ~/.ssh/deploy_rsa
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
             ./run_redeploy_dev.sh
   prod_gameserver_deploy:
     docker:
@@ -73,8 +73,8 @@ jobs:
           name: prep environment
           command: |
             mkdir -p ~/.ssh
-            echo -n "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/deploy_rsa
-            chmod 400 ~/.ssh/deploy_rsa
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
             ./run_redeploy_prod.sh
 
   publish_tag:
