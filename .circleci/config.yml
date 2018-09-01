@@ -53,6 +53,7 @@ jobs:
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
             docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder
   dev_gameserver_deploy:
+    working_directory: ~/csgo
     docker:
       - image: circleci/python:3.6.5
     steps:
@@ -65,6 +66,7 @@ jobs:
             chmod 400 deploy_rsa
             ./run_redeploy_dev.sh
   prod_gameserver_deploy:
+    working_directory: ~/csgo
     docker:
       - image: circleci/python:3.6.5
     steps:
