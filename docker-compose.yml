@@ -9,7 +9,6 @@ services:
       - "0.0.0.0:27015:27015/udp"
     volumes:
       - /var/log/csgo:/csgo/csgo/logs
-      - ./start.sh:/csgo/start.sh 
     networks:
       - local
   event-forwarder:
