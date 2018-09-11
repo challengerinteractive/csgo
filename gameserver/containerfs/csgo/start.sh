@@ -7,6 +7,15 @@ export CSGO_DIR="${CSGO_DIR:-/csgo}"
 export IP="${IP:-0.0.0.0}"
 export PORT="${PORT:-27015}"
 export TICKRATE="${TICKRATE:-128}"
+
+#Mode 	game_type 	game_mode
+#Classic Casual	0	0
+#Classic Competitive	0	1
+#Arms Race 	1	0
+#Demolition 	1	1
+#Deathmatch	1	2
+
+
 export GAME_TYPE="${GAME_TYPE:-0}"
 export GAME_MODE="${GAME_MODE:-1}"
 export MAP="${MAP:-de_dust2}"
