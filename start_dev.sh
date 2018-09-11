@@ -8,15 +8,6 @@ export STEAMCMD_DIR="${STEAMCMD_DIR:-/steamcmd}"
 export IP="${IP:-0.0.0.0}"
 export PORT="${PORT:-27015}"
 export TICKRATE="${TICKRATE:-128}"
-
-#Mode 	game_type 	game_mode
-#Classic Casual	0	0
-#Classic Competitive	0	1
-#Arms Race 	1	0
-#Demolition 	1	1
-#Deathmatch	1	2
-
-
 export GAME_TYPE="${GAME_TYPE:-0}"
 export GAME_MODE="${GAME_MODE:-1}"
 export MAP="${MAP:-de_dust2}"
@@ -26,7 +17,6 @@ export FRIENDLY_FIRE="${FRIENDLY_FIRE:-0}"
 export SERVER_TAGS="${SERVER_TAGS:-ChallengerVault}"
 export SRCDS_EXTRA_ARGS="${SRCDS_EXTRA_ARGS:-}"
 export CSGO_SERVER_CFG_EXTRA_OPTIONS="${CSGO_SERVER_CFG_EXTRA_OPTIONS:-}"
-export BOT_JOIN_AFTER_PLAYER="${BOT_JOIN_AFTER_PLAYER:-1}"
 
 #Value	Location
 #0	US - East
@@ -67,7 +57,6 @@ hostname "$SERVER_HOSTNAME"
 rcon_password "$RCON_PASSWORD"
 sv_lan 0
 sv_cheats 0
-bot_join_after_player "$BOT_JOIN_AFTER_PLAYER"
 writeid
 writeip
 sv_allow_votes “1″ //Turns server voting on and off.

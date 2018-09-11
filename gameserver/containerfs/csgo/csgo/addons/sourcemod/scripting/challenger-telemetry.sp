@@ -9,6 +9,8 @@
 #include "challenger/jsonhelpers.sp"
 
 new Handle:PostUrl = INVALID_HANDLE;
+new Handle:MatchId = INVALID_HANDLE;
+new Handle:RoundId = INVALID_HANDLE;
 
 /**
  * Declare this as a struct in your plugin to expose its information.
@@ -16,9 +18,9 @@ new Handle:PostUrl = INVALID_HANDLE;
 public Plugin myinfo =
 {
     name = "Challenger Telemetry Plugin",
-    author = "Patrick McClory <pmdev@introspectdat.com>",
+    author = "Patrick McClory <pmdev@introspectdata.com>",
     description = "Event-based telemetry forwarder for ChallengerVault application",
-    version = "0.1.1",
+    version = "v0.1.1",
     url = "https://github.com/challengerinteractive/csgo"
 };
 
@@ -32,11 +34,16 @@ public Handle getBaseResponse(const char[] name){
   set_json_string(baseJson, "server_auth_id", server_auth_id);
   set_json_int(baseJson, "steam_server_id", GetServerSteamAccountId());
   json_object_set_new(baseJson, "timestamp", json_integer(GetTime()));
-
+  char match_id[156];
+  GetConVarString(MatchId, match_id, sizeof(match_id));
+  set_json_string(baseJson, "match_id", match_id);
+  char round_id[156];
+  GetConVarString(RoundId, round_id, sizeof(round_id));
+  set_json_string(baseJson, "round_id", round_id);
   char current_map[32];
   GetCurrentMap(current_map, sizeof(current_map));
   set_json_string(baseJson, "map", current_map);
-
+  set_json_int(baseJson, "current_client_count", GetClientCount(true));
   return baseJson;
 }
 
@@ -57,6 +64,8 @@ public Handle getBaseResponse(const char[] name){
  */
 public void OnPluginStart()
 {
+   MatchId = CreateConVar("challenger_MatchId", "default_match_id", "The Match ID used for reporting updates to the Challenger Vault system.");
+   RoundId = CreateConVar("challenger_RoundId", "default_round_id", "The Round ID used for reporting updates to the Challenger Vault system.");
    PostUrl = CreateConVar("challenger_PostUrl", "http://logging_server:5000", "The Url the events will be posted to.");
    AutoExecConfig(true, "challenger");
    HookEvent("player_death", Event_PlayerDeath);
@@ -70,7 +79,7 @@ public void OnPluginStart()
    HookEvent("game_newmap", Event_NewMap);
    HookEvent("game_start", Event_GameStart);
    HookEvent("game_end", Event_GameEnd);
-   HookEvent("begin_new_match", Event_General, EventHookMode_PostNoCopy);
+   HookEvent("begin_new_match", Event_BeginNewMatch, EventHookMode_PostNoCopy);
    HookEvent("cs_intermission", Event_General, EventHookMode_PostNoCopy);
    HookEvent("round_poststart", Event_General, EventHookMode_PostNoCopy);
    HookEvent("round_officially_ended", Event_General, EventHookMode_PostNoCopy);
@@ -92,6 +101,19 @@ public void Event_General(Event event, const char[] name, bool dontBroadcast){
   Handle json = getBaseResponse(name);
   LogChallengerAction(json)
 }
+
+public void Event_BeginNewMatch(Event event, const char[] name, bool dontBroadcast){
+  Handle json = getBaseResponse(name);
+  char server_auth_id[64];
+  GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
+  char buffer[162];
+  Format(buffer, sizeof(buffer), "match-%s-%d", server_auth_id, GetTime());
+  SetConVarString(MatchId, buffer, false, false);
+  set_json_string(json, "match_id", buffer);
+  LogChallengerAction(json)
+}
+
+
 
 //https://wiki.alliedmods.net/Generic_Source_Events#round_end
 public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast){
@@ -122,6 +144,14 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
   Handle json = getBaseResponse(name);
   set_json_int(json, "time_limit", event.GetInt("timelimit"));
   set_json_int(json, "frag_limit", event.GetInt("fraglimit"));
+
+  char server_auth_id[64];
+  GetServerAuthId(AuthId_SteamID64, server_auth_id, sizeof(server_auth_id));
+  char buffer[162];
+  Format(buffer, sizeof(buffer), "round-%s-%d", server_auth_id, GetTime());
+  SetConVarString(RoundId, buffer, false, false);
+  set_json_string(json, "round_id", buffer);
+
   char objective[128];
   event.GetString("objective", objective, sizeof(objective));
   set_json_string(json, "objective", objective);
@@ -150,6 +180,10 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
     char user_steam_id[64]
     if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
       set_json_string(json, "user_steam_id", user_steam_id);
+
+      char client_name[128];
+      GetClientName(user_client, client_name, sizeof(client_name));
+      set_json_string(json, "user_name", client_name);
       int old_team = event.GetInt("oldteam");
       int new_team = event.GetInt("newteam");
       set_json_bool(json, "disconnect", event.GetBool("disconnect"));
@@ -195,6 +229,10 @@ public void Event_PlayerActivate(Event event, const char[] name, bool dontBroadc
     if(GetClientAuthId(user_client, AuthId_SteamID64, user_steam_id, sizeof(user_steam_id), false)) {
       Handle json = getBaseResponse(name);
       set_json_int(json, "user_id", user_id);
+
+      char client_name[128];
+      GetClientName(user_client, client_name, sizeof(client_name));
+      set_json_string(json, "user_name", client_name);
       char team_name[32];
       GetClientTeamByUserId(user_id, team_name, sizeof(team_name))
       set_json_string(json, "team_name", team_name);
@@ -211,11 +249,15 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
   if (user_client != 0 && !IsFakeClient(user_client)){
     Handle json = getBaseResponse(name);
 
+    char client_name[128];
+    GetClientName(user_client, client_name, sizeof(client_name));
+    set_json_string(json, "user_name", client_name);
+
     char connect_name[64];
     event.GetString("name", connect_name, sizeof(connect_name));
     set_json_string(json, "name", connect_name);
 
-    set_json_int(json, "user_id", event.GetInt("userid"));
+    set_json_int(json, "user_id", user_id);
 
     char networkid[64];
     event.GetString("networkid", networkid, sizeof(networkid));
@@ -248,7 +290,10 @@ public void Event_PlayerInfo(Event event, const char[] name, bool dontBroadcast)
     char disconnect_name[64];
     event.GetString("name", disconnect_name, sizeof(disconnect_name));
     set_json_string(json, "name", disconnect_name);
-    set_json_int(json, "user_id", event.GetInt("userid"));
+    set_json_int(json, "user_id", user_id);
+    char client_name[128];
+    GetClientName(user_client, client_name, sizeof(client_name));
+    set_json_string(json, "user_name", client_name);
     char networkid[64];
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
@@ -271,13 +316,16 @@ public void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroa
   int user_client = GetClientOfUserId(user_id);
   if (!IsFakeClient(user_client)){
     Handle json = getBaseResponse(name);
-    set_json_int(json, "user_id", event.GetInt("userid"));
+    set_json_int(json, "user_id", user_id);
     char reason[32];
     event.GetString("reason", reason, sizeof(reason));
     set_json_string(json, "reason", reason);
     char networkid[64];
     event.GetString("networkid", networkid, sizeof(networkid));
     set_json_string(json, "network_id", networkid);
+    char client_name[128];
+    GetClientName(user_client, client_name, sizeof(client_name));
+    set_json_string(json, "user_name", client_name);
 
     char team_name[32];
     GetClientTeamByUserId(user_id, team_name, sizeof(team_name))
@@ -381,7 +429,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 
    char attacker_team[32];
    GetClientTeamByUserId(attacker_id, attacker_team, sizeof(attacker_team))
-   set_json_string(json, "attacker_team", attacker_team);
+   set_json_string(json, "attacker_team_name", attacker_team);
    if (!IsFakeClient(attacker_client)){
      set_json_float(json, "attacker_client_time", GetClientTime(attacker_client));
      char attacker_ip[21];
@@ -407,7 +455,7 @@ public void LogChallengerAction(Handle jsonLog) {
   json_string_value(evt_type, event_type, sizeof(event_type));
   char message[8196];
   json_dump(jsonLog, message, sizeof(message));
-  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), event_type, "v0.1.1", message);
+  LogToFile("logs/player_activity.log", "%d - %s - %s - %s", GetTime(), event_type, PlInfo_Version, message);
   LogActionToHttp(event_type, message);
 }
 

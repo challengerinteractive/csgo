@@ -9,6 +9,9 @@ jobs:
       - setup_remote_docker:
           version: 17.11.0-ce
       - run:
+          name: get filesystem info
+          command: df
+      - run:
           name: install AWS Cli
           command: |
             apk -Uuv add groff less python py-pip
@@ -49,6 +52,36 @@ jobs:
             $(aws ecr get-login --no-include-email)
             docker tag 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:latest
             docker push 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder
+  dev_gameserver_deploy:
+    working_directory: ~/csgo
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - run:
+          name: deploy dev gameservers via ssh
+          no_output_timeout: 1800
+          command: |
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            chmod +x run_redeploy_dev.sh
+            ./run_redeploy_dev.sh
+  prod_gameserver_deploy:
+    working_directory: ~/csgo
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - run:
+          name: deploy production gameservers via ssh
+          no_output_timeout: 1800
+          command: |
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            chmod +x run_redeploy_prod.sh
+            ./run_redeploy_prod.sh
   publish_tag:
     working_directory: ~/csgo
     docker:
@@ -64,6 +97,7 @@ jobs:
             pip install awscli
       - run:
           name: pull, re-tag and push images
+          no_output_timeout: 1800
           command: |
             $(aws ecr get-login --no-include-email)
             docker pull 367860534964.dkr.ecr.us-west-2.amazonaws.com/challenger/csgo_event_forwarder:${CIRCLE_SHA1} &
@@ -79,6 +113,37 @@ jobs:
             echo "Waiting for pushes to complete"
             wait
             echo "Re-tag complete..."
+  reset_dev:
+    working_directory: ~/csgo
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - run:
+          name: reset dev gameservers via ssh
+          no_output_timeout: 1800
+          command: |
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            chmod +x run_restart_prod.sh
+            ./run_restart_dev.sh
+  reset_prod:
+    working_directory: ~/csgo
+    docker:
+      - image: circleci/python:3.6.5
+    steps:
+      - checkout
+      - run:
+          name: reset production gameservers via ssh
+          no_output_timeout: 1800
+          command: |
+            mkdir -p ~/.ssh
+            echo -n "$SSH_PRIVATE_KEY" | base64 -d > deploy_rsa
+            chmod 400 deploy_rsa
+            chmod +x run_restart_prod.sh
+            ./run_restart_prod.sh
+
 workflows:
   version: 2
   build_and_publish:
@@ -93,6 +158,23 @@ workflows:
           filters:
             tags:
               ignore: /^v.*/
+      - approve_dev_gameserver_deploy:
+          type: approval
+          requires:
+            - build_gameserver
+            - build_eventforwarder
+      - dev_gameserver_deploy:
+          context: csgo_server_dev
+          requires:
+            - approve_dev_gameserver_deploy
+      - approve_prod_gameserver_deploy:
+          type: approval
+          requires:
+            - dev_gameserver_deploy
+      - prod_gameserver_deploy:
+          context: csgo_server_prod
+          requires:
+            - approve_prod_gameserver_deploy
       - publish_tag:
           context: challenger_aws_prod
           filters:
@@ -100,3 +182,29 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
+  operations-tasks:
+    jobs:
+      - approve_reset_dev:
+          type: approval
+      - APPROVE_RESET_PROD:
+          type: approval
+      - reset_dev:
+          context: csgo_server_dev
+          requires:
+            - approve_reset_dev
+      - reset_prod:
+          context: csgo_server_prod
+          requires:
+            - APPROVE_RESET_PROD
+      - approve_redeploy_dev:
+          type: approval
+      - APPROVE_REDEPLOY_PROD:
+          type: approval
+      - dev_gameserver_deploy:
+          context: csgo_server_dev
+          requires:
+            - approve_redeploy_dev
+      - prod_gameserver_deploy:
+          context: csgo_server_prod
+          requires:
+            - APPROVE_REDEPLOY_PROD

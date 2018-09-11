@@ -6,7 +6,7 @@ ADD https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz /tmp/
 
 RUN apt-get update && \
 # install dependencies
-    apt-get install --no-install-recommends -y unzip lib32gcc1 lib32stdc++6 ca-certificates && \
+    apt-get install --no-install-recommends -y unzip curl wget lib32gcc1 lib32stdc++6 ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
 # get steamcmd
     mkdir /steamcmd && \
@@ -16,13 +16,16 @@ RUN apt-get update && \
 WORKDIR /steamcmd
 RUN ./steamcmd.sh +login anonymous +force_install_dir /csgo +app_update 740 validate +quit
 
-ADD https://sm.alliedmods.net/smdrop/1.9/sourcemod-1.9.0-git6247-linux.tar.gz /tmp/sourcemod.tar.gz
-ADD https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git965-linux.tar.gz /tmp/metamod.tar.gz
+# ADD https://sm.alliedmods.net/smdrop/1.10/sourcemod-1.10.0-git6329-linux.tar.gz /tmp/sourcemod.tar.gz
+# ADD https://mms.alliedmods.net/mmsdrop/1.11/mmsource-1.11.0-git1116-linux.tar.gz /tmp/metamod.tar.gz
+# ADD https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git966-linux.tar.gz /tmp/metamod.tar.gz
 ADD http://users.alliedmods.net/~kyles/builds/SteamWorks/SteamWorks-git128-linux.tar.gz /tmp/steamworks.tar.gz
 ADD smjansson_2.3.1.3_binaries.zip /tmp/smjansson.zip
 
     # decompress metamod on top of csgo
-RUN tar -xvf /tmp/metamod.tar.gz -C /csgo/csgo && \
+RUN wget https://sm.alliedmods.net/smdrop/1.9/$(curl https://sm.alliedmods.net/smdrop/1.9/sourcemod-latest-linux) -O /tmp/sourcemod.tar.gz && \
+    wget https://mms.alliedmods.net/mmsdrop/1.10/$(curl https://mms.alliedmods.net/mmsdrop/1.10/mmsource-latest-linux) -O /tmp/metamod.tar.gz && \
+    tar -xvf /tmp/metamod.tar.gz -C /csgo/csgo && \
 # decompress sourcemod on top of csgo
     tar -xvf /tmp/sourcemod.tar.gz -C /csgo/csgo && \
 # decompress steamworks on top of csgo

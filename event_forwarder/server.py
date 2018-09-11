@@ -24,7 +24,7 @@ def csgo():
                                 'name': 'cs:go',
                                 'type': 'fps',
                                 'platform': 'steam'},
-                       'server': {'ip': public_ip,
+                       'server': {'ip': public_ip + ':27015',
                                   'mode': os.getenv('GAME_MODE'),
                                   'type': os.getenv('GAME_TYPE'),
                                   'timestamp': str(time.time()),
@@ -35,8 +35,8 @@ def csgo():
         logging.info('DryRun - Payload: ' + json.dumps(kinesis_payload))
     else:
         response = kinesis_client.put_record(
-            StreamName=json.dumps(kinesis_stream),
-            Data=kinesis_payload,
+            StreamName=kinesis_stream,
+            Data=json.dumps(kinesis_payload),
             PartitionKey=str(json_data.get("attacker_serial", "")) + "-" + str(json_data.get('victim_serial', ''))
         )
         logging.info('kinesis.put_record Response: ' + json.dumps(response))
@@ -47,6 +47,6 @@ if __name__ == "__main__":
         kinesis_client.put_record(
             StreamName=kinesis_stream,
             Data=json.dumps({'type': 'server', 'name':'server_start', 'ip': public_ip, 'name': os.getenv('SERVER_HOSTNAME')}),
-            PartitionKey='server'
+            PartitionKey=public_ip
         )
     app.run(port=5000, host='0.0.0.0')
