@@ -45,9 +45,10 @@ def csgo():
 
 if __name__ == "__main__":
     if not os.getenv('DRY_RUN'):
-        kinesis_client.put_record(
+        resposnse = kinesis_client.put_record(
             StreamName=kinesis_stream,
             Data=json.dumps({'type': 'server', 'name':'server_start', 'ip': public_ip, 'name': os.getenv('SERVER_HOSTNAME')}),
             PartitionKey=public_ip
         )
+        print('init server details kinesis_client.put_record response: {}'.format(json.dumps(response)))
     app.run(port=5000, host='0.0.0.0')
