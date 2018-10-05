@@ -32,14 +32,15 @@ def csgo():
                        'payload': json_data}
 
     if os.getenv('DRY_RUN', False):
-        logging.info('DryRun - Payload: ' + json.dumps(kinesis_payload))
+        app.logger.info('DryRun - Payload: {}'.format(json.dumps(kinesis_payload)))
     else:
+        app.logger.debug('kinesis_client.put_record Payload: {}'.format(json.dumps(kinesis_payload)))
         response = kinesis_client.put_record(
             StreamName=kinesis_stream,
             Data=json.dumps(kinesis_payload),
             PartitionKey=str(json_data.get("attacker_serial", "")) + "-" + str(json_data.get('victim_serial', ''))
         )
-        logging.info('kinesis.put_record Response: ' + json.dumps(response))
+        app.logger.info('kinesis_client.put_record Response: {}'.format(json.dumps(response)))
     return '', 204
 
 if __name__ == "__main__":
