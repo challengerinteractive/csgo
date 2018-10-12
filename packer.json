@@ -1,0 +1,90 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "aws_region": "{{env `AWS_DEFAULT_REGION`}}",
+    "aws_instance_type": "t3.large"
+  },
+  "builders": [{
+      "type": "amazon-ebs",
+      "ssh_username": "ubuntu",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `aws_region`}}",
+      "instance_type": "{{user `aws_instance_type`}}",
+      "ami_name": "challenger-csgo {{timestamp}}",
+      "ami_users": ["735792757352", "367860534964"],
+      "ami_regions": ["us-west-2", "us-east-1"],
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_size": 32,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        }
+      ],
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+      }}],
+    "provisioners": [
+      {
+        "type": "file",
+        "source": "gameserver/smjansson_2.3.1.3_binaries.zip",
+        "destination": "/tmp/smjansson.zip"
+      },
+      {
+        "type": "shell",
+        "inline": [
+          "wget https://sm.alliedmods.net/smdrop/1.9/$(curl https://sm.alliedmods.net/smdrop/1.9/sourcemod-latest-linux) -O /tmp/sourcemod.tar.gz",
+          "wget https://mms.alliedmods.net/mmsdrop/1.10/$(curl https://mms.alliedmods.net/mmsdrop/1.10/mmsource-latest-linux) -O /tmp/metamod.tar.gz",
+          "wget http://users.alliedmods.net/~kyles/builds/SteamWorks/SteamWorks-git131-linux.tar.gz -O /tmp/steamworks.tar.gz",
+          "wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz -O /tmp/steamcmd_linux.tar.gz",
+          "sudo apt-get update -y",
+          "sudo apt-get install --no-install-recommends -y unzip curl wget lib32gcc1 lib32stdc++6 ca-certificates",
+          "sudo mkdir -p /steamcmd",
+          "sudo mkdir -p /csgo/csgo/logs",
+          "sudo mkdir -p /csgo/event_forwarder",
+          "sudo chown -R ubuntu:ubuntu /steamcmd",
+          "sudo chown -R ubuntu:ubuntu /csgo",
+          "tar zxvf /tmp/steamcmd_linux.tar.gz -C /steamcmd",
+          "cd /steamcmd",
+          "./steamcmd.sh +login anonymous +force_install_dir /csgo +app_update 740 validate +quit",
+          "tar -xvf /tmp/metamod.tar.gz -C /csgo/csgo",
+          "tar -xvf /tmp/sourcemod.tar.gz -C /csgo/csgo",
+          "tar -xvf /tmp/steamworks.tar.gz -C /csgo/csgo",
+          "unzip /tmp/smjansson.zip *.so -d /csgo/csgo/addons/sourcemod/extensions/",
+          "sudo chown ubuntu:ubuntu /csgo/csgo/addons/sourcemod/extensions/smjansson.ext.so",
+          "chmod 700 /csgo/csgo/addons/sourcemod/extensions/smjansson.ext.so",
+          "mv /csgo/csgo/addons/sourcemod/plugins/disabled/mapchooser.smx /csgo/csgo/addons/sourcemod/plugins/mapchooser.smx"
+        ]
+      },
+      {
+        "type": "file",
+        "source": "gameserver/containerfs/",
+        "destination": "/"
+      },
+      {
+        "type": "file",
+        "source": "event_forwarder/",
+        "destination": "/csgo/event_forwarder/"
+      },
+      {
+        "type": "shell",
+        "inline": [
+            "cd /csgo/csgo/addons/sourcemod/scripting",
+            "./compile.sh challenger-telemetry.sp",
+            "mv compiled/challenger-telemetry.smx ../plugins/",
+            "mkdir -p /home/ubuntu/.steam/sdk32",
+            "ln -s /steamcmd/kinux32/steamclient.so /home/ubuntu/.steam/sdk32/steamclient.so",
+            "sudo apt-get install -y python3-pip python3-dev",
+            "sudo pip3 install -f /csgo/event_forwarder/requirements.txt"
+        ]
+    }
+    ]
+}
