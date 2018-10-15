@@ -83,13 +83,36 @@
             "ln -s /steamcmd/kinux32/steamclient.so /home/ubuntu/.steam/sdk32/steamclient.so",
             "sudo apt-get install -y python3-pip python3-dev",
             "sudo pip3 install -f /csgo/event_forwarder/requirements.txt",
-            "sudp apt-get install -y supervisor"
+            "sudo apt-get install -y supervisor"
         ]
       },
       {
         "type": "file",
+        "source": "run_with_env.sh",
+        "destination": "/tmp/run_with_env.sh"
+      },
+      {
+        "type": "file",
+        "source": "packer_start.sh",
+        "destination": "/csgo/start.sh"
+      },
+      {
+        "type": "file",
         "source": "supervisor/",
-        "destination": "/etc/supervisor/conf.d/"
+        "destination": "/tmp"
+      },
+      {
+        "type": "shell",
+        "inline": [
+            "sudo mv /tmp/csgo.conf /etc/supervisor/conf.d/",
+            "sudo mv /tmp/event_forwarder.conf /etc/supervisor/conf.d/",
+            "sudo chmod +x /csgo/start.sh",
+            "sudo mv /tmp/run_with_env.sh /usr/local/bin/run_with_env.sh",
+            "sudo chmod +x /usr/local/bin/run_with_env.sh",
+            "sudo ln -s /steamcmd/steamcmd.sh /steamcmd/steam.sh",
+            "sudo ln -s /steamcmd/linux32/steamcmd /steamcmd/linux32/steam",
+            "pip3 install -r /csgo/event_forwarder/requirements.txt"
+        ]
       }
     ]
 }

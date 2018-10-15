@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -o allexport
+source ${ENV_FILE:/etc/challenger_env.sh}
+set +o allexport
+
 export SERVER_HOSTNAME="${SERVER_HOSTNAME:-ChallengerVault CSGO - Play and Win}"
 export RCON_PASSWORD="${RCON_PASSWORD:-}"
 export STEAM_ACCOUNT="${STEAM_ACCOUNT:-}"
@@ -81,17 +85,16 @@ sv_tags "$SERVER_TAGS"
 $CSGO_SERVER_CFG_EXTRA_OPTIONS
 SERVERCFG
 
+sed -i 's/#!\/bin\/sh/#!\/bin\/bash/' srcds_run
 
 ./srcds_run \
     -steamerr \
-    -autoupdate \
-    -steam_dir /steamcmd \
-    -steamcmd_script /csgo/csgo_ds.txt \
+    -console \
     -usercon \
     -game csgo \
     -tickrate $TICKRATE \
     -port $PORT \
-    +maxplayers_override $MAXPLAYERS \
+    -maxplayers_override $MAXPLAYERS \
     +game_type $GAME_TYPE \
     +game_mode $GAME_MODE \
     +mapgroup $MAPGROUP \
