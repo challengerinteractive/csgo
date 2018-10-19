@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# install aws cloudwatch logs shipping - https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/EC2NewInstanceCWL.html
+curl https://s3.amazonaws.com//aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
+chmod +x ./awslogs-agent-setup.py
+./awslogs-agent-setup.py -n -r us-west-2 -c /csgo/awslogs.conf
+
 cat > /etc/challenger_env.sh << EOF
 export SERVER_HOSTNAME="ChallengerVault DEV - TEST SERVER"
 export RCON_PASSWORD="1H9bMh90XP72"
@@ -15,11 +20,11 @@ export GAME_TYPE="1"
 export GAME_MODE="2"
 export MAP="de_dust2"
 export MAPGROUP="mg_active"
-export MAXPLAYERS="16"
+export MAXPLAYERS="32"
 export FRIENDLY_FIRE="0"
 export SERVER_TAGS="ChallengerVault"
 export SRCDS_EXTRA_ARGS=""
-export CSGO_SERVER_CFG_EXTRA_OPTIONS=""
+export CSGO_SERVER_CFG_EXTRA_OPTIONS="sv_password 38Fjipq8A3Cq"
 EOF
 
 service supervisor restart

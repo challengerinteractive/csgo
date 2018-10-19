@@ -55,27 +55,29 @@ cd $CSGO_DIR
 cat << SERVERCFG > $CSGO_DIR/csgo/cfg/server.cfg
 hostname "$SERVER_HOSTNAME"
 rcon_password "$RCON_PASSWORD"
-sv_lan 0
-sv_cheats 0
+sv_lan "0"
+sv_cheats "0"
 writeid
 writeip
-sv_allow_votes “1″ //Turns server voting on and off.
-sv_vote_allow_spectators “0″ //Allow spectators to vote?”
-sv_vote_command_delay “2″ //How long after a vote passes until the action happens
-sv_vote_creation_time “120″ //How often someone can individually call a vote.
-sv_vote_failure_timer “300″ //A vote that fails cannot be re-submitted for this long
-sv_vote_quorum_ratio “0″ //The minimum ratio of players needed to vote on an issue to resolve it.
-sv_vote_timer_duration “15″ //How long to allow voting on an issue
+host_info_show "2"
+host_players_show "2"
+sv_allow_votes "1" //Turns server voting on and off.
+sv_vote_allow_spectators "0" //Allow spectators to vote?”
+sv_vote_command_delay "2" //How long after a vote passes until the action happens
+sv_vote_creation_time "120" //How often someone can individually call a vote.
+sv_vote_failure_timer "300" //A vote that fails cannot be re-submitted for this long
+sv_vote_quorum_ratio "0" //The minimum ratio of players needed to vote on an issue to resolve it.
+sv_vote_timer_duration "15" //How long to allow voting on an issue
 log on
-mp_logfile 1
-mp_logdetail 3
-mp_logmessages 1
-sv_log_onefile “0″ //Log server information to only one file.
-sv_logbans “1″ //Log server bans in the server logs.
-sv_logecho “1″ //Echo log information to the console.
-sv_logfile “1″ //Log server information in the log file.
-sv_logflush “0″ //Flush the log file to disk on each write (slow).
-mp_friendlyfire “$FRIENDLY_FIRE″ //Enable Friendly Fire 1 =Enable 0 =Disable
+mp_logfile "1"
+mp_logdetail "3"
+mp_logmessages "1"
+sv_log_onefile "0" //Log server information to only one file.
+sv_logbans "1" //Log server bans in the server logs.
+sv_logecho "1" //Echo log information to the console.
+sv_logfile "1" //Log server information in the log file.
+sv_logflush "0" //Flush the log file to disk on each write (slow).
+mp_friendlyfire "$FRIENDLY_FIRE" //Enable Friendly Fire 1 =Enable 0 =Disable
 sv_region "$REGION_NUMBER"
 sv_tags "$SERVER_TAGS"
 $CSGO_SERVER_CFG_EXTRA_OPTIONS
@@ -83,7 +85,6 @@ SERVERCFG
 
 
 ./srcds_run \
-    -steamerr \
     -autoupdate \
     -steam_dir /steamcmd \
     -steamcmd_script /csgo/csgo_ds.txt \
@@ -91,7 +92,7 @@ SERVERCFG
     -game csgo \
     -tickrate $TICKRATE \
     -port $PORT \
-    +maxplayers_override $MAXPLAYERS \
+    +maxplayers $MAXPLAYERS \
     +game_type $GAME_TYPE \
     +game_mode $GAME_MODE \
     +mapgroup $MAPGROUP \

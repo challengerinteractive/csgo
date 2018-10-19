@@ -13,7 +13,8 @@
       "region": "{{user `aws_region`}}",
       "instance_type": "{{user `aws_instance_type`}}",
       "ami_name": "challenger-csgo-dev {{timestamp}}",
-      "ami_regions": ["us-west-2"],
+      "ami_users": ["735792757352", "367860534964"],
+      "ami_regions": ["us-west-2", "us-east-1"],
       "launch_block_device_mappings": [
         {
           "device_name": "/dev/sda1",
@@ -72,6 +73,11 @@
         "type": "file",
         "source": "event_forwarder/",
         "destination": "/csgo/event_forwarder/"
+      },
+      {
+        "type": "file",
+        "source": "awslogs.conf",
+        "destination": "/csgo/awslogs.conf"
       },
       {
         "type": "shell",
